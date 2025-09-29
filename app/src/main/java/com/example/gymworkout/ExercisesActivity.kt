@@ -5,41 +5,45 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ArrayAdapter
-import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import androidx.appcompat.widget.Toolbar
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.gymworkout.data.DatabaseHelper
+import com.example.gymworkout.data.model.Exercise
+import com.example.gymworkout.ui.ExerciseRecyclerAdapter
 import com.example.gymworkout.ui.login.LoginActivity
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class ExercisesActivity : AppCompatActivity() {
 
-    private lateinit var listView: ListView
-    private lateinit var adapter: ArrayAdapter<String>
-    private lateinit var exercises: List<String>
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: ExerciseRecyclerAdapter
+    private lateinit var exercises: List<Exercise>
+    private var workoutId: Long = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_excercises)
 
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        workoutId = intent.getLongExtra("workoutId", -1)
+
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
         val dbHelper = DatabaseHelper(this)
-        exercises = dbHelper.getAllExerciseNames()
+        exercises = dbHelper.getAllExercises()
 
-        listView = findViewById(R.id.exercisesListView)
-        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, exercises)
-        listView.adapter = adapter
-
-        listView.setOnItemClickListener { _, _, position, _ ->
-            val selectedExercise = exercises[position]
-            val intent = Intent(this, ExerciseInstructionsActivity::class.java)
-            intent.putExtra("exerciseName", selectedExercise)
-            startActivity(intent)
+        recyclerView = findViewById(R.id.exercisesListView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        adapter = ExerciseRecyclerAdapter(exercises) { exercise ->
+            if (workoutId != -1L) {
+                dbHelper.addExerciseToWorkout(workoutId.toInt(), exercise.id)
+                finish()
+            }
         }
+        recyclerView.adapter = adapter
 
         val addExerciseFab = findViewById<FloatingActionButton>(R.id.addExerciseFab)
         addExerciseFab.setOnClickListener {
@@ -51,9 +55,8 @@ class ExercisesActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         val dbHelper = DatabaseHelper(this)
-        exercises = dbHelper.getAllExerciseNames()
-        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, exercises)
-        listView.adapter = adapter
+        exercises = dbHelper.getAllExercises()
+        adapter.updateData(exercises)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -67,7 +70,10 @@ class ExercisesActivity : AppCompatActivity() {
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                adapter.filter.filter(newText)
+                val filteredExercises = exercises.filter {
+                    it.name.contains(newText ?: "", ignoreCase = true)
+                }
+                adapter.updateData(filteredExercises)
                 return true
             }
         })

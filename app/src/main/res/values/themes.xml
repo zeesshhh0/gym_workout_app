@@ -1,9 +1,20 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.GymWorkout" parent="Theme.Material3.DayNight">
-        <!-- Customize your light theme here. -->
+    <style name="Base.Theme.GymWorkout" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light/dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
     <style name="Theme.GymWorkout" parent="Base.Theme.GymWorkout" />
+
+    <!-- Optional: If you need a separate NoActionBar variant, but base is already NoActionBar -->
+    <style name="Theme.GymWorkout.NoActionBar" parent="Base.Theme.GymWorkout">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <!-- Use Material3 overlays for consistency -->
+    <style name="Theme.GymWorkout.AppBarOverlay" parent="ThemeOverlay.Material3.Dark" />
+
+    <style name="Theme.GymWorkout.PopupOverlay" parent="ThemeOverlay.Material3.Light" />
 </resources>

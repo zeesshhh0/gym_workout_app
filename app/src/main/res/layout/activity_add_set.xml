@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AddSetActivity">
+
+    <EditText
+        android:id="@+id/edit_text_sets"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Sets"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/edit_text_reps"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Reps"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edit_text_sets" />
+
+    <EditText
+        android:id="@+id/edit_text_weight"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Weight"
+        android:inputType="numberDecimal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edit_text_reps" />
+
+    <Button
+        android:id="@+id/button_add_set"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Set"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edit_text_weight" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

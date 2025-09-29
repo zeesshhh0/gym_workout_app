@@ -31,7 +31,7 @@ class LoginActivity : AppCompatActivity() {
 
         binding.login.setOnClickListener {
             val email = binding.email?.text.toString()
-            val password = binding.password.text.toString()
+            val password = binding.password1?.text.toString()
 
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
