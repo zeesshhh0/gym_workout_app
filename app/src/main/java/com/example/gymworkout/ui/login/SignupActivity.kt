@@ -4,7 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.gymworkout.MainActivity
+import com.example.gymworkout.ExercisesActivity
 import com.example.gymworkout.data.DatabaseHelper
 import com.example.gymworkout.databinding.ActivitySignupBinding
 
@@ -36,7 +36,7 @@ class SignupActivity : AppCompatActivity() {
                 val userId = dbHelper.addUser(username, email, password)
                 if (userId != -1L) {
                     Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, MainActivity::class.java))
+                    startActivity(Intent(this, ExercisesActivity::class.java))
                     finish()
                 } else {
                     Toast.makeText(this, "Registration failed", Toast.LENGTH_SHORT).show()

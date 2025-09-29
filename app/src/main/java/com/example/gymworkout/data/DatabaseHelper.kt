@@ -130,12 +130,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return db.insert("USERS", null, contentValues)
     }
 
-    fun checkUser(email: String, password_hash: String): Boolean {
+    fun checkUser(email: String, password_hash: String): Int {
         val db = this.readableDatabase
         val cursor = db.rawQuery("SELECT * FROM USERS WHERE email = ? AND password_hash = ?", arrayOf(email, password_hash))
-        val count = cursor.count
+        var userId = -1
+        if (cursor.moveToFirst()) {
+            userId = cursor.getInt(cursor.getColumnIndexOrThrow("user_id"))
+        }
         cursor.close()
-        return count > 0
+        return userId
     }
 
     fun isUserRegistered(email: String): Boolean {
@@ -144,5 +147,40 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val count = cursor.count
         cursor.close()
         return count > 0
+    }
+
+    fun getAllExerciseNames(): List<String> {
+        val exerciseNames = mutableListOf<String>()
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT exercise_name FROM EXERCISES", null)
+        if (cursor.moveToFirst()) {
+            do {
+                val name = cursor.getString(cursor.getColumnIndexOrThrow("exercise_name"))
+                exerciseNames.add(name)
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return exerciseNames
+    }
+
+    fun getExerciseInstructions(exerciseName: String): String? {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT instructions FROM EXERCISES WHERE exercise_name = ?", arrayOf(exerciseName))
+        var instructions: String? = null
+        if (cursor.moveToFirst()) {
+            instructions = cursor.getString(cursor.getColumnIndexOrThrow("instructions"))
+        }
+        cursor.close()
+        return instructions
+    }
+
+    fun addExercise(muscleGroupId: Int, name: String, description: String, instructions: String): Long {
+        val db = this.writableDatabase
+        val contentValues = ContentValues()
+        contentValues.put("muscle_group_id", muscleGroupId)
+        contentValues.put("exercise_name", name)
+        contentValues.put("description", description)
+        contentValues.put("instructions", instructions)
+        return db.insert("EXERCISES", null, contentValues)
     }
 }

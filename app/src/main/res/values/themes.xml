@@ -1,18 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.GymWorkout" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.GymWorkout" parent="Theme.Material3.DayNight">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
     <style name="Theme.GymWorkout" parent="Base.Theme.GymWorkout" />
-
-    <style name="Theme.GymWorkout.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="Theme.GymWorkout.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="Theme.GymWorkout.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

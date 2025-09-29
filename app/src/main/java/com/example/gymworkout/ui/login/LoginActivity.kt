@@ -1,10 +1,11 @@
 package com.example.gymworkout.ui.login
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.gymworkout.MainActivity
+import com.example.gymworkout.ExercisesActivity
 import com.example.gymworkout.data.DatabaseHelper
 import com.example.gymworkout.databinding.ActivityLoginBinding
 
@@ -15,6 +16,14 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        if (sharedPreferences.contains("user_id")) {
+            startActivity(Intent(this, ExercisesActivity::class.java))
+            finish()
+            return
+        }
+
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -29,10 +38,15 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            if (dbHelper.checkUser(email, password)) {
+            val userId = dbHelper.checkUser(email, password)
+            if (userId != -1) {
                 // Login successful
+                val editor = sharedPreferences.edit()
+                editor.putInt("user_id", userId)
+                editor.apply()
+
                 Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, MainActivity::class.java))
+                startActivity(Intent(this, ExercisesActivity::class.java))
                 finish()
             } else {
                 // Login failed

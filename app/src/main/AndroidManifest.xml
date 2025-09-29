@@ -13,20 +13,14 @@
         android:theme="@style/Theme.GymWorkout"
         tools:targetApi="31">
         <activity
+            android:name=".AddExerciseActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ExerciseInstructionsActivity"
+            android:exported="false" />
+        <activity
             android:name=".ExercisesActivity"
-            android:exported="false" />
-        <activity
-            android:name=".WorkoutActivity"
-            android:exported="false"
-            android:label="@string/title_activity_workout"
-            android:theme="@style/Theme.GymWorkout.NoActionBar" />
-        <activity
-            android:name=".ui.login.SignupActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.login.LoginActivity"
-            android:exported="true"
-            android:label="@string/title_activity_login">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -34,8 +28,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.login.SignupActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.login.LoginActivity"
+            android:exported="true"
+            android:label="@string/title_activity_login" />
     </application>
 
 </manifest>
