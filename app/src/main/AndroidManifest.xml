@@ -37,6 +37,9 @@
             android:name=".ui.workout.AddSetActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.workout.SessionDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.login.SignupActivity"
             android:exported="false" />
         <activity

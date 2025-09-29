@@ -14,6 +14,9 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
+        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
         bottomNav.setOnNavigationItemSelectedListener(navListener)
 
@@ -22,21 +25,37 @@ class HomeActivity : AppCompatActivity() {
             supportFragmentManager.beginTransaction().replace(R.id.fragment_container,
                 HomeFragment()
             ).commit()
+            supportActionBar?.title = "Home"
         }
     }
 
     private val navListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         var selectedFragment: Fragment? = null
+        var title: String = ""
 
         when (item.itemId) {
-            R.id.navigation_home -> selectedFragment = HomeFragment()
-            R.id.navigation_exercises -> selectedFragment = ExercisesFragment()
-            R.id.navigation_profile -> selectedFragment = ProfileFragment()
+            R.id.navigation_home -> {
+                selectedFragment = HomeFragment()
+                title = "Home"
+            }
+            R.id.navigation_sessions -> {
+                selectedFragment = SessionsFragment()
+                title = "Workout Sessions"
+            }
+            R.id.navigation_exercises -> {
+                selectedFragment = ExercisesFragment()
+                title = "Exercises"
+            }
+            R.id.navigation_profile -> {
+                selectedFragment = ProfileFragment()
+                title = "Profile"
+            }
         }
 
         if (selectedFragment != null) {
             supportFragmentManager.beginTransaction().replace(R.id.fragment_container,
                 selectedFragment).commit()
+            supportActionBar?.title = title
         }
 
         true

@@ -339,4 +339,73 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         cursor.close()
         return sets
     }
+
+    fun getAllWorkoutSessions(): List<com.example.gymworkout.data.model.WorkoutSession> {
+        val sessions = mutableListOf<com.example.gymworkout.data.model.WorkoutSession>()
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("""
+            SELECT ws.session_id, ws.workout_id, w.workout_name, ws.workout_date, ws.start_time, ws.end_time, ws.notes
+            FROM WORKOUT_SESSIONS ws
+            INNER JOIN WORKOUT w ON ws.workout_id = w.workout_id
+            ORDER BY ws.workout_date DESC, ws.start_time DESC
+        """, null)
+
+        if (cursor.moveToFirst()) {
+            do {
+                val id = cursor.getInt(cursor.getColumnIndexOrThrow("session_id"))
+                val workoutId = cursor.getInt(cursor.getColumnIndexOrThrow("workout_id"))
+                val workoutName = cursor.getString(cursor.getColumnIndexOrThrow("workout_name"))
+                val date = cursor.getString(cursor.getColumnIndexOrThrow("workout_date"))
+                val startTime = cursor.getString(cursor.getColumnIndexOrThrow("start_time"))
+                val endTime = cursor.getString(cursor.getColumnIndexOrThrow("end_time"))
+                val notes = cursor.getString(cursor.getColumnIndexOrThrow("notes"))
+                sessions.add(com.example.gymworkout.data.model.WorkoutSession(id, workoutId, workoutName, date, startTime, endTime, notes))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return sessions
+    }
+
+    fun getExercisesForSession(sessionId: Int): List<com.example.gymworkout.data.model.Exercise> {
+        val exercises = mutableListOf<com.example.gymworkout.data.model.Exercise>()
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("""
+            SELECT DISTINCT e.exercise_id, e.exercise_name, mg.name as muscle_group
+            FROM EXERCISES e
+            INNER JOIN MUSCLE_GROUPS mg ON e.muscle_group_id = mg.muscle_group_id
+            INNER JOIN SETS s ON e.exercise_id = s.exercise_id
+            WHERE s.session_id = ?
+            ORDER BY e.exercise_name ASC
+        """, arrayOf(sessionId.toString()))
+
+        if (cursor.moveToFirst()) {
+            do {
+                val id = cursor.getInt(cursor.getColumnIndexOrThrow("exercise_id"))
+                val name = cursor.getString(cursor.getColumnIndexOrThrow("exercise_name"))
+                val muscleGroup = cursor.getString(cursor.getColumnIndexOrThrow("muscle_group"))
+                exercises.add(com.example.gymworkout.data.model.Exercise(id, name, muscleGroup))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return exercises
+    }
+
+    fun getSetsForExerciseInSession(sessionId: Int, exerciseId: Int): List<com.example.gymworkout.data.model.Set> {
+        val sets = mutableListOf<com.example.gymworkout.data.model.Set>()
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM SETS WHERE session_id = ? AND exercise_id = ? ORDER BY set_number ASC", arrayOf(sessionId.toString(), exerciseId.toString()))
+        if (cursor.moveToFirst()) {
+            do {
+                val id = cursor.getInt(cursor.getColumnIndexOrThrow("set_id"))
+                val sId = cursor.getInt(cursor.getColumnIndexOrThrow("session_id"))
+                val eId = cursor.getInt(cursor.getColumnIndexOrThrow("exercise_id"))
+                val setNumber = cursor.getInt(cursor.getColumnIndexOrThrow("set_number"))
+                val reps = cursor.getInt(cursor.getColumnIndexOrThrow("reps"))
+                val weightUsed = cursor.getFloat(cursor.getColumnIndexOrThrow("weight_used"))
+                sets.add(com.example.gymworkout.data.model.Set(id, sId, eId, setNumber, weightUsed, reps))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return sets
+    }
 }

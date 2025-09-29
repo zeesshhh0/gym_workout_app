@@ -24,6 +24,9 @@ class WorkoutActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_workout)
 
+        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
         dbHelper = DatabaseHelper(this)
 
         workoutId = intent.getLongExtra("workoutId", -1)

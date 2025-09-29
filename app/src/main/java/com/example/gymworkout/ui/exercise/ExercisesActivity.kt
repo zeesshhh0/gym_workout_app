@@ -81,20 +81,4 @@ class ExercisesActivity : AppCompatActivity() {
 
         return true
     }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_logout -> {
-                val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-                val editor = sharedPreferences.edit()
-                editor.remove("user_id")
-                editor.apply()
-
-                startActivity(Intent(this, LoginActivity::class.java))
-                finish()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
 }

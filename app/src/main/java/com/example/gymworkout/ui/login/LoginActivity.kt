@@ -27,6 +27,8 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.toolbar)
+
         dbHelper = DatabaseHelper(this)
 
         binding.login.setOnClickListener {

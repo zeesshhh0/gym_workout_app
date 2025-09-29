@@ -21,6 +21,11 @@ class AddSetActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_set)
 
+        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.title = "Add Set"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
         dbHelper = DatabaseHelper(this)
 
         workoutId = intent.getIntExtra("workoutId", -1)

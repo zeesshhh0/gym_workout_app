@@ -18,6 +18,8 @@ class SignupActivity : AppCompatActivity() {
         binding = ActivitySignupBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.toolbar)
+
         dbHelper = DatabaseHelper(this)
 
         binding.signup.setOnClickListener {
