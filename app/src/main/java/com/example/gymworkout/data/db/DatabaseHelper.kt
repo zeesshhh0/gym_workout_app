@@ -1,4 +1,4 @@
-package com.example.gymworkout.data
+package com.example.gymworkout.data.db
 
 import android.content.ContentValues
 import android.content.Context

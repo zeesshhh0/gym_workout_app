@@ -1,4 +1,4 @@
-package com.example.gymworkout.ui
+package com.example.gymworkout.ui.adapters
 
 import android.view.LayoutInflater
 import android.view.View

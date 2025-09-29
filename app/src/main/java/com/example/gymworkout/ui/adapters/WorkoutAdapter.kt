@@ -1,4 +1,4 @@
-package com.example.gymworkout.ui
+package com.example.gymworkout.ui.adapters
 
 import android.content.Intent
 import android.view.LayoutInflater
@@ -7,9 +7,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.gymworkout.AddSetActivity
+import com.example.gymworkout.ui.workout.AddSetActivity
 import com.example.gymworkout.R
-import com.example.gymworkout.data.DatabaseHelper
+import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.data.model.Exercise
 
 class WorkoutAdapter(var exercises: List<Exercise>) : RecyclerView.Adapter<WorkoutAdapter.ViewHolder>() {

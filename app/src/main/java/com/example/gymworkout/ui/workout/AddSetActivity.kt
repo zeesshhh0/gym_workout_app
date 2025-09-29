@@ -1,10 +1,11 @@
-package com.example.gymworkout
+package com.example.gymworkout.ui.workout
 
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
-import com.example.gymworkout.data.DatabaseHelper
+import com.example.gymworkout.R
+import com.example.gymworkout.data.db.DatabaseHelper
 
 class AddSetActivity : AppCompatActivity() {
 

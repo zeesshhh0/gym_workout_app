@@ -1,4 +1,4 @@
-package com.example.gymworkout
+package com.example.gymworkout.ui.main
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,9 +7,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.gymworkout.data.DatabaseHelper
+import com.example.gymworkout.R
+import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.data.model.Exercise
-import com.example.gymworkout.ui.ExerciseRecyclerAdapter
+import com.example.gymworkout.ui.adapters.ExerciseRecyclerAdapter
 
 class ExercisesFragment : Fragment() {
 

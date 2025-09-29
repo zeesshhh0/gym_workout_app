@@ -5,8 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.gymworkout.ExercisesActivity
-import com.example.gymworkout.data.DatabaseHelper
+import com.example.gymworkout.ui.exercise.ExercisesActivity
+import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {

@@ -1,8 +1,11 @@
-package com.example.gymworkout
+package com.example.gymworkout.ui.main
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.gymworkout.ui.main.HomeFragment
+import com.example.gymworkout.ui.main.ProfileFragment
+import com.example.gymworkout.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class HomeActivity : AppCompatActivity() {
@@ -17,7 +20,8 @@ class HomeActivity : AppCompatActivity() {
         // Load the default fragment
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction().replace(R.id.fragment_container,
-                HomeFragment()).commit()
+                HomeFragment()
+            ).commit()
         }
     }
 

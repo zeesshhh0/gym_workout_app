@@ -13,7 +13,7 @@
         android:theme="@style/Theme.GymWorkout"
         tools:targetApi="31">
         <activity
-            android:name=".HomeActivity"
+            android:name=".ui.main.HomeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,19 +22,19 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".WorkoutActivity"
+            android:name=".ui.workout.WorkoutActivity"
             android:exported="false" />
         <activity
-            android:name=".AddExerciseActivity"
+            android:name=".ui.exercise.AddExerciseActivity"
             android:exported="false" />
         <activity
-            android:name=".ExerciseInstructionsActivity"
+            android:name=".ui.exercise.ExerciseInstructionsActivity"
             android:exported="false" />
         <activity
-            android:name=".ExercisesActivity"
+            android:name=".ui.exercise.ExercisesActivity"
             android:exported="true" />
         <activity
-            android:name=".AddSetActivity"
+            android:name=".ui.workout.AddSetActivity"
             android:exported="false" />
         <activity
             android:name=".ui.login.SignupActivity"

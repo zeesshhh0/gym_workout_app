@@ -1,10 +1,11 @@
-package com.example.gymworkout
+package com.example.gymworkout.ui.exercise
 
 import android.os.Bundle
 import android.text.Html
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import com.example.gymworkout.data.DatabaseHelper
+import com.example.gymworkout.R
+import com.example.gymworkout.data.db.DatabaseHelper
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.textview.MaterialTextView
 

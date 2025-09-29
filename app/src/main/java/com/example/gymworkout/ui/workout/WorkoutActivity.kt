@@ -1,4 +1,4 @@
-package com.example.gymworkout
+package com.example.gymworkout.ui.workout
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,9 +6,10 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.gymworkout.data.DatabaseHelper
-import com.example.gymworkout.data.model.Exercise
-import com.example.gymworkout.ui.WorkoutAdapter
+import com.example.gymworkout.R
+import com.example.gymworkout.data.db.DatabaseHelper
+import com.example.gymworkout.ui.adapters.WorkoutAdapter
+import com.example.gymworkout.ui.exercise.ExercisesActivity
 
 class WorkoutActivity : AppCompatActivity() {
 

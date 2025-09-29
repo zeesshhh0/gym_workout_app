@@ -1,4 +1,4 @@
-package com.example.gymworkout
+package com.example.gymworkout.ui.exercise
 
 import android.content.Context
 import android.content.Intent
@@ -9,9 +9,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.gymworkout.data.DatabaseHelper
+import com.example.gymworkout.R
+import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.data.model.Exercise
-import com.example.gymworkout.ui.ExerciseRecyclerAdapter
+import com.example.gymworkout.ui.adapters.ExerciseRecyclerAdapter
 import com.example.gymworkout.ui.login.LoginActivity
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -25,7 +26,7 @@ class ExercisesActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_excercises)
+        setContentView(R.layout.activity_exercises)
 
         workoutId = intent.getLongExtra("workoutId", -1)
 
