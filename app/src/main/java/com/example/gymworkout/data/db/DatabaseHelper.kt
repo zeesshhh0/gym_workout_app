@@ -240,6 +240,21 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return instructions
     }
 
+    fun getAllMuscleGroups(): List<com.example.gymworkout.data.model.MuscleGroup> {
+        val muscleGroups = mutableListOf<com.example.gymworkout.data.model.MuscleGroup>()
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT muscle_group_id, name FROM MUSCLE_GROUPS", null)
+        if (cursor.moveToFirst()) {
+            do {
+                val id = cursor.getInt(cursor.getColumnIndexOrThrow("muscle_group_id"))
+                val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
+                muscleGroups.add(com.example.gymworkout.data.model.MuscleGroup(id, name))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return muscleGroups
+    }
+
     fun addExercise(muscleGroupId: Int, name: String, description: String, instructions: String): Long {
         val db = this.writableDatabase
         val contentValues = ContentValues()

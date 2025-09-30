@@ -20,7 +20,7 @@ class ExerciseInstructionsActivity : AppCompatActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val exerciseName = intent.getStringExtra("exerciseName")
+        val exerciseName = intent.getStringExtra("exercise_name")
 
         supportActionBar?.title = exerciseName
 

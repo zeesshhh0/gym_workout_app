@@ -3,6 +3,7 @@ package com.example.gymworkout.ui.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,6 +22,7 @@ class WorkoutAdapter(var exercises: List<Exercise>, private val showAddSetButton
         val exercise = exercises[position]
         holder.name.text = exercise.name
         holder.muscleGroup.text = exercise.muscleGroup
+        holder.exerciseImageView.visibility = View.GONE
 
         if (showAddSetButton) {
             holder.addSetButton.visibility = View.VISIBLE
@@ -82,6 +84,7 @@ class WorkoutAdapter(var exercises: List<Exercise>, private val showAddSetButton
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val name: TextView = itemView.findViewById(R.id.text_view_exercise_name)
         val muscleGroup: TextView = itemView.findViewById(R.id.text_view_muscle_group)
+        val exerciseImageView: ImageView = itemView.findViewById(R.id.image_view_exercise)
         val setsRecyclerView: RecyclerView = itemView.findViewById(R.id.recycler_view_sets)
         val addSetButton: android.widget.Button = itemView.findViewById(R.id.button_add_set)
     }

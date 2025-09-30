@@ -3,6 +3,7 @@ package com.example.gymworkout.ui.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymworkout.R
@@ -11,7 +12,8 @@ import com.example.gymworkout.data.model.Exercise
 class ExerciseRecyclerAdapter(
     private var exercises: List<Exercise>,
     private val onItemClick: (Exercise) -> Unit,
-    private val showAddSetButton: Boolean = false
+    private val showAddSetButton: Boolean = false,
+    private val showExerciseImage: Boolean = true
 ) : RecyclerView.Adapter<ExerciseRecyclerAdapter.ExerciseViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExerciseViewHolder {
@@ -28,6 +30,11 @@ class ExerciseRecyclerAdapter(
         } else {
             holder.addSetButton.visibility = View.GONE
         }
+        if (showExerciseImage) {
+            holder.exerciseImageView.visibility = View.VISIBLE
+        } else {
+            holder.exerciseImageView.visibility = View.GONE
+        }
     }
 
     override fun getItemCount(): Int = exercises.size
@@ -38,7 +45,7 @@ class ExerciseRecyclerAdapter(
     }
 
     inner class ExerciseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        /*private val exerciseImageView: ImageView = itemView.findViewById(R.id.text_view_exercise_name)*/
+        val exerciseImageView: ImageView = itemView.findViewById(R.id.image_view_exercise)
         private val exerciseNameTextView: TextView = itemView.findViewById(R.id.text_view_exercise_name)
         private val muscleGroupTextView: TextView = itemView.findViewById(R.id.text_view_muscle_group)
         val addSetButton: android.widget.Button = itemView.findViewById(R.id.button_add_set)
@@ -47,14 +54,14 @@ class ExerciseRecyclerAdapter(
             exerciseNameTextView.text = exercise.name
             muscleGroupTextView.text = exercise.muscleGroup
 
-           /* val drawableId = when (exercise.muscleGroup.lowercase()) {
+            val drawableId = when (exercise.muscleGroup.lowercase()) {
                 "chest" -> R.drawable.chest
                 "biceps" -> R.drawable.bicpes
                 "quadriceps" -> R.drawable.quadriceps
                 "abs" -> R.drawable.abs
                 else -> R.drawable.bicpes
             }
-            exerciseImageView.setImageResource(drawableId)*/
+            exerciseImageView.setImageResource(drawableId)
 
             itemView.setOnClickListener { onItemClick(exercise) }
         }
