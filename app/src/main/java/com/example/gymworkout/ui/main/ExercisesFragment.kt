@@ -31,7 +31,7 @@ class ExercisesFragment : Fragment() {
 
         recyclerView = view.findViewById(R.id.exercisesRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = ExerciseRecyclerAdapter(exercises) { }
+        adapter = ExerciseRecyclerAdapter(exercises, { }, false)
         recyclerView.adapter = adapter
 
         return view

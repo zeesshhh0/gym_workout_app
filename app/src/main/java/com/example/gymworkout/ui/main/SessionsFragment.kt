@@ -29,7 +29,9 @@ class SessionsFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_sessions, container, false)
 
         dbHelper = DatabaseHelper(requireContext())
-        sessions = dbHelper.getAllWorkoutSessions()
+        val sharedPreferences = requireActivity().getSharedPreferences("user_prefs", android.content.Context.MODE_PRIVATE)
+        val userId = sharedPreferences.getInt("user_id", -1)
+        sessions = dbHelper.getAllWorkoutSessions(userId)
 
         recyclerView = view.findViewById(R.id.sessionsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
@@ -45,7 +47,9 @@ class SessionsFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        sessions = dbHelper.getAllWorkoutSessions()
+        val sharedPreferences = requireActivity().getSharedPreferences("user_prefs", android.content.Context.MODE_PRIVATE)
+        val userId = sharedPreferences.getInt("user_id", -1)
+        sessions = dbHelper.getAllWorkoutSessions(userId)
         sessionAdapter.updateData(sessions)
     }
 }

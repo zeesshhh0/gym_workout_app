@@ -22,7 +22,7 @@ class HomeFragment : Fragment() {
         val buttonCreateWorkout: Button = view.findViewById(R.id.buttonCreateWorkout)
         buttonCreateWorkout.setOnClickListener {
             val intent = Intent(activity, WorkoutActivity::class.java)
-            startActivity(intent)
+            activity?.startActivityForResult(intent, 1)
         }
 
         return view

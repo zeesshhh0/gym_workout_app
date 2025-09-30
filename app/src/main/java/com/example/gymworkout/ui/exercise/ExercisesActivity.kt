@@ -1,10 +1,8 @@
 package com.example.gymworkout.ui.exercise
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
-import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,7 +11,6 @@ import com.example.gymworkout.R
 import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.data.model.Exercise
 import com.example.gymworkout.ui.adapters.ExerciseRecyclerAdapter
-import com.example.gymworkout.ui.login.LoginActivity
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -38,12 +35,15 @@ class ExercisesActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.exercisesListView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = ExerciseRecyclerAdapter(exercises) { exercise ->
-            if (workoutId != -1L) {
-                dbHelper.addExerciseToWorkout(workoutId.toInt(), exercise.id)
-                finish()
-            }
-        }
+        adapter = ExerciseRecyclerAdapter(
+            exercises = exercises,
+            onItemClick = { exercise ->
+                if (workoutId != -1L) {
+                    dbHelper.addExerciseToWorkout(workoutId.toInt(), exercise.id)
+                    finish()
+                }
+            }, showAddSetButton = false
+        )
         recyclerView.adapter = adapter
 
         val addExerciseFab = findViewById<FloatingActionButton>(R.id.addExerciseFab)

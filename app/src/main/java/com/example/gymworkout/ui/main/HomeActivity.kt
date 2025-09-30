@@ -1,10 +1,9 @@
 package com.example.gymworkout.ui.main
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.example.gymworkout.ui.main.HomeFragment
-import com.example.gymworkout.ui.main.ProfileFragment
 import com.example.gymworkout.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -59,5 +58,13 @@ class HomeActivity : AppCompatActivity() {
         }
 
         true
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
+            bottomNav.selectedItemId = R.id.navigation_sessions
+        }
     }
 }

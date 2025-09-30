@@ -295,6 +295,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun getOrCreateWorkoutSession(workoutId: Int): Int {
         val db = this.writableDatabase
         val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd")
+        val timeFormat = java.text.SimpleDateFormat("HH:mm:ss")
         val date = dateFormat.format(java.util.Date())
         val cursor = db.rawQuery("SELECT session_id FROM WORKOUT_SESSIONS WHERE workout_id = ? AND workout_date = ?", arrayOf(workoutId.toString(), date))
         if (cursor.moveToFirst()) {
@@ -305,8 +306,41 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             val contentValues = ContentValues()
             contentValues.put("workout_id", workoutId)
             contentValues.put("workout_date", date)
+            contentValues.put("start_time", timeFormat.format(java.util.Date()))
             return db.insert("WORKOUT_SESSIONS", null, contentValues).toInt()
         }
+    }
+
+    fun updateWorkoutName(workoutId: Long, newName: String) {
+        val db = this.writableDatabase
+        val contentValues = ContentValues()
+        contentValues.put("workout_name", newName)
+        db.update("WORKOUT", contentValues, "workout_id = ?", arrayOf(workoutId.toString()))
+    }
+
+    fun getWorkoutName(workoutId: Long): String {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT workout_name FROM WORKOUT WHERE workout_id = ?", arrayOf(workoutId.toString()))
+        var workoutName = ""
+        if (cursor.moveToFirst()) {
+            workoutName = cursor.getString(cursor.getColumnIndexOrThrow("workout_name"))
+        }
+        cursor.close()
+        return workoutName
+    }
+
+    fun updateWorkoutSessionStartTime(sessionId: Int, startTime: String) {
+        val db = this.writableDatabase
+        val contentValues = ContentValues()
+        contentValues.put("start_time", startTime)
+        db.update("WORKOUT_SESSIONS", contentValues, "session_id = ?", arrayOf(sessionId.toString()))
+    }
+
+    fun updateWorkoutSessionEndTime(sessionId: Int, endTime: String) {
+        val db = this.writableDatabase
+        val contentValues = ContentValues()
+        contentValues.put("end_time", endTime)
+        db.update("WORKOUT_SESSIONS", contentValues, "session_id = ?", arrayOf(sessionId.toString()))
     }
 
     fun addSet(workoutId: Int, exerciseId: Int, sets: Int, reps: Int, weight: Float) {
@@ -340,15 +374,16 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return sets
     }
 
-    fun getAllWorkoutSessions(): List<com.example.gymworkout.data.model.WorkoutSession> {
+    fun getAllWorkoutSessions(userId: Int): List<com.example.gymworkout.data.model.WorkoutSession> {
         val sessions = mutableListOf<com.example.gymworkout.data.model.WorkoutSession>()
         val db = this.readableDatabase
         val cursor = db.rawQuery("""
             SELECT ws.session_id, ws.workout_id, w.workout_name, ws.workout_date, ws.start_time, ws.end_time, ws.notes
             FROM WORKOUT_SESSIONS ws
             INNER JOIN WORKOUT w ON ws.workout_id = w.workout_id
+            WHERE w.user_id = ?
             ORDER BY ws.workout_date DESC, ws.start_time DESC
-        """, null)
+        """, arrayOf(userId.toString()))
 
         if (cursor.moveToFirst()) {
             do {
@@ -407,5 +442,30 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         }
         cursor.close()
         return sets
+    }
+
+    fun deleteWorkoutAndSession(workoutId: Long, sessionId: Int) {
+        val db = this.writableDatabase
+        db.beginTransaction()
+        try {
+            db.delete("WORKOUT_SESSIONS", "session_id = ?", arrayOf(sessionId.toString()))
+            db.delete("WORKOUT_EXERCISE", "workout_id = ?", arrayOf(workoutId.toString()))
+            db.delete("WORKOUT", "workout_id = ?", arrayOf(workoutId.toString()))
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
+    fun deleteWorkoutSession(sessionId: Int) {
+        val db = this.writableDatabase
+        db.beginTransaction()
+        try {
+            db.delete("SETS", "session_id = ?", arrayOf(sessionId.toString()))
+            db.delete("WORKOUT_SESSIONS", "session_id = ?", arrayOf(sessionId.toString()))
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
     }
 }

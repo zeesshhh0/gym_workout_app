@@ -1,7 +1,9 @@
 package com.example.gymworkout.ui.workout
 
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -33,16 +35,43 @@ class SessionDetailActivity : AppCompatActivity() {
         if (sessionId != -1) {
             // Fetch exercises for this session
             val exercises = dbHelper.getExercisesForSession(sessionId)
-            val sessionDetailExerciseAdapter = SessionDetailExerciseAdapter(exercises, sessionId, dbHelper)
+            val sessionDetailExerciseAdapter = SessionDetailExerciseAdapter(exercises, sessionId, dbHelper, false)
             recyclerView.adapter = sessionDetailExerciseAdapter
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_session_detail, menu)
+        return true
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == android.R.id.home) {
-            finish()
-            return true
+        return when (item.itemId) {
+            android.R.id.home -> {
+                finish()
+                true
+            }
+            R.id.action_delete_session -> {
+                showDeleteConfirmationDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
-        return super.onOptionsItemSelected(item)
+    }
+
+    private fun showDeleteConfirmationDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Delete Session")
+            .setMessage("Are you sure you want to delete this workout session? This action cannot be undone.")
+            .setPositiveButton("Delete") { _, _ ->
+                deleteSession()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun deleteSession() {
+        dbHelper.deleteWorkoutSession(sessionId)
+        finish() // Close the activity after deletion
     }
 }
