@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.gymworkout.R
 import com.example.gymworkout.data.model.Set
 
-class SetAdapter(var sets: List<Set>) : RecyclerView.Adapter<SetAdapter.ViewHolder>() {
+class SetAdapter(var sets: List<Set>, private val onSetClick: (Set) -> Unit) : RecyclerView.Adapter<SetAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_set, parent, false)
@@ -20,10 +20,16 @@ class SetAdapter(var sets: List<Set>) : RecyclerView.Adapter<SetAdapter.ViewHold
         holder.setNumber.text = "Set ${set.setNumber}"
         holder.reps.text = "${set.reps} reps"
         holder.weight.text = "${set.weightUsed} kg"
+        holder.itemView.setOnClickListener { onSetClick(set) }
     }
 
     override fun getItemCount(): Int {
         return sets.size
+    }
+
+    fun updateData(newSets: List<Set>) {
+        sets = newSets
+        notifyDataSetChanged()
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

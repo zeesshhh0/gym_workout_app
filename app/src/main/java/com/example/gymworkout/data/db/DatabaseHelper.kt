@@ -358,7 +358,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun getSetsForExercise(sessionId: Int, exerciseId: Int): List<com.example.gymworkout.data.model.Set> {
         val sets = mutableListOf<com.example.gymworkout.data.model.Set>()
         val db = this.readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM SETS WHERE session_id = ? AND exercise_id = ?", arrayOf(sessionId.toString(), exerciseId.toString()))
+        val cursor = db.rawQuery("SELECT * FROM SETS WHERE session_id = ? AND exercise_id = ? ORDER BY set_number ASC", arrayOf(sessionId.toString(), exerciseId.toString()))
         if (cursor.moveToFirst()) {
             do {
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow("set_id"))
@@ -467,5 +467,13 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         } finally {
             db.endTransaction()
         }
+    }
+
+    fun updateSet(setId: Int, reps: Int, weight: Float) {
+        val db = this.writableDatabase
+        val contentValues = ContentValues()
+        contentValues.put("reps", reps)
+        contentValues.put("weight_used", weight)
+        db.update("SETS", contentValues, "set_id = ?", arrayOf(setId.toString()))
     }
 }

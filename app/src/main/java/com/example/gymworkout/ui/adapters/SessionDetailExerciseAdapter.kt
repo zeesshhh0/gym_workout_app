@@ -3,6 +3,7 @@ package com.example.gymworkout.ui.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,7 +22,7 @@ class SessionDetailExerciseAdapter(
         val exerciseName: TextView = itemView.findViewById(R.id.text_view_exercise_name)
         val muscleGroup: TextView = itemView.findViewById(R.id.text_view_muscle_group)
         val setsRecyclerView: RecyclerView = itemView.findViewById(R.id.recycler_view_sets)
-        val addSetButton: android.widget.Button = itemView.findViewById(R.id.button_add_set)
+        val addSetButton: Button = itemView.findViewById(R.id.button_add_set)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExerciseViewHolder {
@@ -42,7 +43,10 @@ class SessionDetailExerciseAdapter(
 
         // Fetch sets for this exercise in this session
         val sets = dbHelper.getSetsForExerciseInSession(sessionId, exercise.id)
-        val setAdapter = SetAdapter(sets)
+        val setAdapter = SetAdapter(
+            sets,
+            onSetClick = { }
+        )
         holder.setsRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context)
         holder.setsRecyclerView.adapter = setAdapter
     }
