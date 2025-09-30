@@ -1,12 +1,14 @@
 package com.example.gymworkout.ui.login
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.gymworkout.ui.exercise.ExercisesActivity
 import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.databinding.ActivitySignupBinding
+import com.example.gymworkout.ui.main.HomeActivity
 
 class SignupActivity : AppCompatActivity() {
 
@@ -18,32 +20,59 @@ class SignupActivity : AppCompatActivity() {
         binding = ActivitySignupBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setSupportActionBar(binding.toolbar)
-
+        // Initialize DatabaseHelper
         dbHelper = DatabaseHelper(this)
 
         binding.signup.setOnClickListener {
-            val email = binding.email.text.toString()
-            val username = binding.username.text.toString()
-            val password = binding.password.text.toString()
+            with(binding) {
+                usernameLayout.error = null
+                emailLayout.error = null
+                passwordLayout.error = null
 
-            if (email.isEmpty() || username.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+                val username = username.text.toString().trim()
+                val email = email.text.toString().trim()
+                val password = password.text.toString()
 
-            if (dbHelper.isUserRegistered(email)) {
-                Toast.makeText(this, "User already registered", Toast.LENGTH_SHORT).show()
-            } else {
+                // Input validation
+                if (username.isEmpty()) {
+                    usernameLayout.error = "Username cannot be empty"
+                    return@setOnClickListener
+                }
+                if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    emailLayout.error = "Invalid email format"
+                    return@setOnClickListener
+                }
+                if (password.length < 6) {
+                    passwordLayout.error = "Password must be at least 6 characters"
+                    return@setOnClickListener
+                }
+
                 val userId = dbHelper.addUser(username, email, password)
-                if (userId != -1L) {
-                    Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, ExercisesActivity::class.java))
+                if (userId.toInt() != -1) {
+                    // Save user session
+                    val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                    val editor = sharedPreferences.edit()
+                    editor.putInt("user_id", userId.toInt())
+                    editor.putBoolean("is_logged_in", true)
+                    editor.apply()
+
+                    Toast.makeText(this@SignupActivity, "Signup successful!", Toast.LENGTH_SHORT).show()
+
+                    // Navigate to HomeActivity
+                    val intent = Intent(this@SignupActivity, HomeActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
                     finish()
                 } else {
-                    Toast.makeText(this, "Registration failed", Toast.LENGTH_SHORT).show()
+                    emailLayout.error = "Signup failed. Email might already be in use."
                 }
             }
+        }
+
+        binding.loginLink.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
         }
     }
 }

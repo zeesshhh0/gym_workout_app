@@ -358,6 +358,27 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return streak
     }
 
+    fun getUserDetails(userId: Int): Pair<String, String>? {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT username, email FROM USERS WHERE user_id = ?", arrayOf(userId.toString()))
+        var userDetails: Pair<String, String>? = null
+        if (cursor.moveToFirst()) {
+            val username = cursor.getString(cursor.getColumnIndexOrThrow("username"))
+            val email = cursor.getString(cursor.getColumnIndexOrThrow("email"))
+            userDetails = Pair(username, email)
+        }
+        cursor.close()
+        return userDetails
+    }
+
+    fun updateUserDetails(userId: Int, username: String, email: String) {
+        val db = this.writableDatabase
+        val contentValues = ContentValues()
+        contentValues.put("username", username)
+        contentValues.put("email", email)
+        db.update("USERS", contentValues, "user_id = ?", arrayOf(userId.toString()))
+    }
+
 
 
     fun getAllExercises(): List<com.example.gymworkout.data.model.Exercise> {

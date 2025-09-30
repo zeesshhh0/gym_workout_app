@@ -3,11 +3,12 @@ package com.example.gymworkout.ui.login
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.gymworkout.ui.exercise.ExercisesActivity
 import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.databinding.ActivityLoginBinding
+import com.example.gymworkout.ui.main.HomeActivity
 
 class LoginActivity : AppCompatActivity() {
 
@@ -17,9 +18,12 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Check if user is already logged in
         val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
         if (sharedPreferences.contains("user_id")) {
-            startActivity(Intent(this, ExercisesActivity::class.java))
+            val intent = Intent(this, HomeActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
             finish()
             return
         }
@@ -27,37 +31,50 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setSupportActionBar(binding.toolbar)
-
         dbHelper = DatabaseHelper(this)
 
         binding.login.setOnClickListener {
-            val email = binding.email?.text.toString()
-            val password = binding.password1?.text.toString()
+            with(binding) {
+                emailLayout.error = null
+                passwordLayout.error = null
 
-            if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+                val email = email.text.toString().trim()
+                val password = password.text.toString()
 
-            val userId = dbHelper.checkUser(email, password)
-            if (userId != -1) {
-                // Login successful
-                val editor = sharedPreferences.edit()
-                editor.putInt("user_id", userId)
-                editor.apply()
+                // Input validation
+                if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    emailLayout.error = "Invalid email format"
+                    return@setOnClickListener
+                }
+                if (password.isEmpty()) {
+                    passwordLayout.error = "Password cannot be empty"
+                    return@setOnClickListener
+                }
 
-                Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, ExercisesActivity::class.java))
-                finish()
-            } else {
-                // Login failed
-                Toast.makeText(this, "Invalid credentials", Toast.LENGTH_SHORT).show()
+                val userId = dbHelper.checkUser(email, password)
+                if (userId != -1) {
+                    // Save user session
+                    val editor = sharedPreferences.edit()
+                    editor.putInt("user_id", userId)
+                    editor.putBoolean("is_logged_in", true)
+                    editor.apply()
+
+                    Toast.makeText(this@LoginActivity, "Login successful!", Toast.LENGTH_SHORT).show()
+
+                    // Navigate to HomeActivity
+                    val intent = Intent(this@LoginActivity, HomeActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    finish()
+                } else {
+                    passwordLayout.error = "Invalid email or password"
+                }
             }
         }
 
-        binding.signupLink?.setOnClickListener {
+        binding.signupLink.setOnClickListener {
             startActivity(Intent(this, SignupActivity::class.java))
+            finish()
         }
     }
 }

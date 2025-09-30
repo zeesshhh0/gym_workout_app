@@ -1,17 +1,38 @@
 package com.example.gymworkout.ui.main
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+
 import com.example.gymworkout.R
+import com.example.gymworkout.databinding.ActivityHomeBinding
+import com.example.gymworkout.ui.login.LoginActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class HomeActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityHomeBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home)
+
+        // Check if user is logged in
+        val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        val isLoggedIn = sharedPreferences.getBoolean("is_logged_in", false)
+
+        if (!isLoggedIn) {
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+            return // Important to prevent the rest of onCreate from running
+        }
+
+        binding = ActivityHomeBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
