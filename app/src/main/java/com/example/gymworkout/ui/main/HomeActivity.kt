@@ -35,7 +35,7 @@ class HomeActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.navigation_home -> {
                 selectedFragment = HomeFragment()
-                title = "Home"
+                title = "Workout Tracker"
             }
             R.id.navigation_sessions -> {
                 selectedFragment = SessionsFragment()

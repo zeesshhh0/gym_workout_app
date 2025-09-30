@@ -1,99 +1,209 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground">
+    android:background="?attr/colorSurface"
+    android:clipToPadding="false"
+    android:padding="16dp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/text_view_greeting"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceHeadline5"
-            tools:text="Good Afternoon, Priya!" />
-
-        <TextView
-            android:id="@+id/text_view_streak"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textAppearance="?attr/textAppearanceBody1"
-            tools:text="You're on a 4-day streak 🔥" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_start_freestyle_workout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="24dp"
-            android:text="Start Workout" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Last Workout"
-            android:textAppearance="?attr/textAppearanceHeadline6" />
-
+        <!-- Greeting Card -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/card_last_workout"
-            android:layout_width="match_parent"
+            android:id="@+id/card_greeting"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp">
+            android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="?attr/colorPrimaryContainer"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:strokeColor="?attr/colorOutline"
+            app:strokeWidth="1dp">
 
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp">
+                android:orientation="horizontal"
+                android:padding="20dp"
+                android:gravity="center_vertical">
 
                 <TextView
-                    android:id="@+id/text_view_last_workout_name"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/text_view_greeting"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:textAppearance="?attr/textAppearanceBody1"
-                    android:textStyle="bold"
-                    tools:text="Leg Day" />
-
-                <TextView
-                    android:id="@+id/text_view_last_workout_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:textAppearance="?attr/textAppearanceBody2"
-                    tools:text="Yesterday" />
-
-                <TextView
-                    android:id="@+id/text_view_last_workout_stats"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/text_view_last_workout_name"
-                    android:layout_marginTop="4dp"
-                    android:textAppearance="?attr/textAppearanceBody2"
-                    tools:text="55 min • 7 exercises • 9,200 kg volume" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_view_details"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/text_view_last_workout_stats"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginTop="8dp"
-                    android:text="View Details" />
-
-            </RelativeLayout>
+                    android:layout_weight="1"
+                    android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                    android:textColor="?attr/colorOnPrimaryContainer"
+                    tools:text="Good Morning, User" />
+            </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-    </LinearLayout>
-</ScrollView>
+        <!-- Workout Streak -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_streak"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="?attr/colorSecondaryContainer"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/card_greeting"
+            app:strokeColor="?attr/colorOutline"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:id="@+id/text_view_streak_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Workout Streak"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorOnSecondaryContainer" />
+
+                <TextView
+                    android:id="@+id/text_view_streak"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textAppearance="?attr/textAppearanceDisplaySmall"
+                    android:textColor="?attr/colorOnSecondaryContainer"
+                    android:textStyle="bold"
+                    tools:text="5 days" />
+
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/progress_streak"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    app:indicatorColor="?attr/colorPrimary"
+                    app:trackColor="?attr/colorSurfaceVariant"
+                    app:trackCornerRadius="4dp"
+                    tools:progress="50" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Start Workout Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_start_workout"
+            style="@style/Widget.Material3.Button.ElevatedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp"
+            android:paddingVertical="14dp"
+            android:text="Start Workout"
+            android:textAppearance="?attr/textAppearanceLabelLarge"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/card_streak" />
+
+        <!-- Last Workout Section -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/last_workout_container"
+            android:layout_width="0dp"
+            android:layout_marginTop="36dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/button_start_workout">
+
+            <!-- Last Workout Label -->
+            <TextView
+                android:id="@+id/text_view_last_workout_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Last Workout"
+                android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                android:textColor="?attr/colorOnSurface"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- Last Workout Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_last_workout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardBackgroundColor="?attr/colorSurfaceContainer"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_view_last_workout_label"
+                app:strokeColor="?attr/colorOutline"
+                app:strokeWidth="1dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+
+                    <!-- Workout Name -->
+                    <TextView
+                        android:id="@+id/text_view_last_workout_name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="Push Day" />
+
+                    <!-- Workout Type Chip -->
+
+
+                    <!-- Workout Date -->
+                    <TextView
+                        android:id="@+id/text_view_last_workout_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/text_view_last_workout_name"
+                        tools:text="September 30, 2025" />
+
+                    <!-- Workout Stats -->
+                    <TextView
+                        android:id="@+id/text_view_last_workout_stats"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/text_view_last_workout_date"
+                        tools:text="Duration: 45 mins\nExercises: 6\nVolume: 5,400 kg" />
+
+                    <!-- View Details Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_view_details"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="View Details"
+                        android:textAppearance="?attr/textAppearanceLabelLarge"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/text_view_last_workout_stats" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

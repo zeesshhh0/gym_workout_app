@@ -52,9 +52,9 @@ class HomeFragment : Fragment() {
         // Streak
         val streakTextView = view.findViewById<TextView>(R.id.text_view_streak)
         val streak = dbHelper.calculateWorkoutStreak(userId)
-        streakTextView.text = if (streak > 0) "You're on a $streak-day streak 🔥" else "Start a new workout!"
+        streakTextView.text = if (streak > 0) "$streak-day streak 🔥" else "Start a new workout!"
 
-        val startWorkoutButton = view.findViewById<Button>(R.id.button_start_freestyle_workout)
+        val startWorkoutButton = view.findViewById<Button>(R.id.button_start_workout)
         startWorkoutButton.setOnClickListener {
             val intent = Intent(activity, WorkoutActivity::class.java)
             activity?.startActivity(intent)
@@ -89,10 +89,10 @@ class HomeFragment : Fragment() {
     private fun getGreeting(name: String): String {
         val c = Calendar.getInstance()
         return when (c.get(Calendar.HOUR_OF_DAY)) {
-            in 0..11 -> "Good Morning, $name! ☀️😊"
-            in 12..17 -> "Good Afternoon, $name! 🌞👍"
-            in 17..23 -> "Good Evening, $name! 🌙✨"
-            else -> "Hello, $name! 👋"
+            in 0..11 -> "Good Morning, $name!"
+            in 12..17 -> "Good Afternoon, $name!"
+            in 17..23 -> "Good Evening, $name!"
+            else -> "Hello, $name!"
         }
     }
 
