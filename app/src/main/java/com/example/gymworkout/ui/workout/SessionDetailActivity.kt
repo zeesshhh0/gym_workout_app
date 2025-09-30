@@ -27,7 +27,7 @@ class SessionDetailActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         dbHelper = DatabaseHelper(this)
-        sessionId = intent.getIntExtra("sessionId", -1)
+        sessionId = intent.getIntExtra("session_id", -1)
 
         recyclerView = findViewById(R.id.sessionDetailRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -72,6 +72,7 @@ class SessionDetailActivity : AppCompatActivity() {
 
     private fun deleteSession() {
         dbHelper.deleteWorkoutSession(sessionId)
+        setResult(RESULT_OK)
         finish() // Close the activity after deletion
     }
 }

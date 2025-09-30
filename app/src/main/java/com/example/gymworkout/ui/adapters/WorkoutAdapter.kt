@@ -33,13 +33,19 @@ class WorkoutAdapter(var exercises: List<Exercise>, private val showAddSetButton
         val dbHelper = DatabaseHelper(holder.itemView.context)
         val sessionId = dbHelper.getOrCreateWorkoutSession(exercise.workoutId)
         var sets = dbHelper.getSetsForExercise(sessionId, exercise.id)
-        val setAdapter = SetAdapter(sets) { set ->
+        val setAdapter = SetAdapter(sets, { set ->
             showEditSetDialog(holder.itemView.context, set) {
                 // Refresh sets after editing
                 val updatedSets = dbHelper.getSetsForExercise(sessionId, exercise.id)
                 (holder.setsRecyclerView.adapter as SetAdapter).updateData(updatedSets)
             }
-        }
+        }, { set ->
+            showDeleteSetDialog(holder.itemView.context, set) {
+                // Refresh sets after deleting
+                val updatedSets = dbHelper.getSetsForExercise(sessionId, exercise.id)
+                (holder.setsRecyclerView.adapter as SetAdapter).updateData(updatedSets)
+            }
+        })
         holder.setsRecyclerView.adapter = setAdapter
         holder.setsRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context)
 
@@ -50,6 +56,19 @@ class WorkoutAdapter(var exercises: List<Exercise>, private val showAddSetButton
             sets = dbHelper.getSetsForExercise(sessionId, exercise.id)
             (holder.setsRecyclerView.adapter as SetAdapter).updateData(sets)
         }
+    }
+
+    private fun showDeleteSetDialog(context: android.content.Context, set: com.example.gymworkout.data.model.Set, onSetDeleted: () -> Unit) {
+        val builder = android.app.AlertDialog.Builder(context)
+        builder.setTitle("Delete Set")
+        builder.setMessage("Are you sure you want to delete this set?")
+        builder.setPositiveButton("Delete") { _, _ ->
+            val dbHelper = DatabaseHelper(context)
+            dbHelper.deleteSet(set.id)
+            onSetDeleted()
+        }
+        builder.setNegativeButton("Cancel", null)
+        builder.create().show()
     }
 
     private fun showEditSetDialog(context: android.content.Context, set: com.example.gymworkout.data.model.Set, onSetUpdated: () -> Unit) {

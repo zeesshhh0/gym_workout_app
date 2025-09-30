@@ -45,7 +45,8 @@ class SessionDetailExerciseAdapter(
         val sets = dbHelper.getSetsForExerciseInSession(sessionId, exercise.id)
         val setAdapter = SetAdapter(
             sets,
-            onSetClick = { }
+            onSetClick = { },
+            onSetDeleteClick = {}
         )
         holder.setsRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context)
         holder.setsRecyclerView.adapter = setAdapter

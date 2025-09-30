@@ -8,7 +8,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.gymworkout.R
 import com.example.gymworkout.data.model.Set
 
-class SetAdapter(var sets: List<Set>, private val onSetClick: (Set) -> Unit) : RecyclerView.Adapter<SetAdapter.ViewHolder>() {
+class SetAdapter(
+    var sets: List<Set>,
+    private val onSetClick: (Set) -> Unit,
+    private val onSetDeleteClick: (Set) -> Unit
+) : RecyclerView.Adapter<SetAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_set, parent, false)
@@ -21,6 +25,7 @@ class SetAdapter(var sets: List<Set>, private val onSetClick: (Set) -> Unit) : R
         holder.reps.text = "${set.reps} reps"
         holder.weight.text = "${set.weightUsed} kg"
         holder.itemView.setOnClickListener { onSetClick(set) }
+        holder.deleteButton.setOnClickListener { onSetDeleteClick(set) }
     }
 
     override fun getItemCount(): Int {
@@ -36,5 +41,6 @@ class SetAdapter(var sets: List<Set>, private val onSetClick: (Set) -> Unit) : R
         val setNumber: TextView = itemView.findViewById(R.id.text_view_set_number)
         val reps: TextView = itemView.findViewById(R.id.text_view_reps)
         val weight: TextView = itemView.findViewById(R.id.text_view_weight)
+        val deleteButton: View = itemView.findViewById(R.id.button_delete_set)
     }
 }

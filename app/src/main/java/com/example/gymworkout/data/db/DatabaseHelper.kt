@@ -209,6 +209,157 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return count > 0
     }
 
+    fun getUserName(userId: Int): String? {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT username FROM USERS WHERE user_id = ?", arrayOf(userId.toString()))
+        var username: String? = null
+        if (cursor.moveToFirst()) {
+            username = cursor.getString(cursor.getColumnIndexOrThrow("username"))
+        }
+        cursor.close()
+        return username
+    }
+
+    fun getLatestWorkoutForUser(userId: Int): com.example.gymworkout.data.model.Workout? {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM WORKOUT WHERE user_id = ? ORDER BY workout_id DESC LIMIT 1", arrayOf(userId.toString()))
+        var workout: com.example.gymworkout.data.model.Workout? = null
+        if (cursor.moveToFirst()) {
+            val id = cursor.getInt(cursor.getColumnIndexOrThrow("workout_id"))
+            val name = cursor.getString(cursor.getColumnIndexOrThrow("workout_name"))
+            val description = cursor.getString(cursor.getColumnIndexOrThrow("description"))
+            workout = com.example.gymworkout.data.model.Workout(id,
+                userId.toString(), name, description)
+        }
+        cursor.close()
+        return workout
+    }
+
+    fun getLatestWorkoutSession(userId: Int): com.example.gymworkout.data.model.WorkoutSession? {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("""
+        SELECT ws.*, w.workout_name FROM WORKOUT_SESSIONS ws
+        JOIN WORKOUT w ON ws.workout_id = w.workout_id
+        WHERE w.user_id = ?
+        ORDER BY ws.workout_date DESC, ws.start_time DESC
+        LIMIT 1
+    """, arrayOf(userId.toString()))
+
+        var session: com.example.gymworkout.data.model.WorkoutSession? = null
+        if (cursor.moveToFirst()) {
+            val id = cursor.getInt(cursor.getColumnIndexOrThrow("session_id"))
+            val workoutId = cursor.getInt(cursor.getColumnIndexOrThrow("workout_id"))
+            val workoutName = cursor.getString(cursor.getColumnIndexOrThrow("workout_name"))
+            val date = cursor.getString(cursor.getColumnIndexOrThrow("workout_date"))
+            val startTime = cursor.getString(cursor.getColumnIndexOrThrow("start_time"))
+            val endTime = cursor.getString(cursor.getColumnIndexOrThrow("end_time"))
+            val notes = cursor.getString(cursor.getColumnIndexOrThrow("notes"))
+            session = com.example.gymworkout.data.model.WorkoutSession(id, workoutId, workoutName, date, startTime, endTime, notes)
+        }
+        cursor.close()
+        return session
+    }
+
+    fun getSessionStats(sessionId: Int): com.example.gymworkout.data.model.SessionStats {
+        val db = this.readableDatabase
+
+        // Calculate duration
+        val sessionCursor = db.rawQuery("SELECT start_time, end_time FROM WORKOUT_SESSIONS WHERE session_id = ?", arrayOf(sessionId.toString()))
+        var durationMinutes: Long = 0
+        if (sessionCursor.moveToFirst()) {
+            val startTimeStr = sessionCursor.getString(sessionCursor.getColumnIndexOrThrow("start_time"))
+            val endTimeStr = sessionCursor.getString(sessionCursor.getColumnIndexOrThrow("end_time"))
+            if (startTimeStr != null && endTimeStr != null) {
+                val timeFormat = java.text.SimpleDateFormat("HH:mm:ss")
+                val startTime = timeFormat.parse(startTimeStr)
+                val endTime = timeFormat.parse(endTimeStr)
+                val diff = endTime.time - startTime.time
+                durationMinutes = java.util.concurrent.TimeUnit.MILLISECONDS.toMinutes(diff)
+            }
+        }
+        sessionCursor.close()
+
+        // Calculate exercise count
+        val exerciseCursor = db.rawQuery("SELECT COUNT(DISTINCT exercise_id) as count FROM SETS WHERE session_id = ?", arrayOf(sessionId.toString()))
+        var exerciseCount = 0
+        if (exerciseCursor.moveToFirst()) {
+            exerciseCount = exerciseCursor.getInt(exerciseCursor.getColumnIndexOrThrow("count"))
+        }
+        exerciseCursor.close()
+
+        // Calculate total volume
+        val volumeCursor = db.rawQuery("SELECT SUM(reps * weight_used) as volume FROM SETS WHERE session_id = ?", arrayOf(sessionId.toString()))
+        var totalVolume: Float = 0f
+        if (volumeCursor.moveToFirst()) {
+            totalVolume = volumeCursor.getFloat(volumeCursor.getColumnIndexOrThrow("volume"))
+        }
+        volumeCursor.close()
+
+        return com.example.gymworkout.data.model.SessionStats(durationMinutes, exerciseCount, totalVolume)
+    }
+
+    fun calculateWorkoutStreak(userId: Int): Int {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("""
+        SELECT DISTINCT workout_date FROM WORKOUT_SESSIONS ws
+        JOIN WORKOUT w ON ws.workout_id = w.workout_id
+        WHERE w.user_id = ?
+        ORDER BY workout_date DESC
+    """, arrayOf(userId.toString()))
+
+        val dates = mutableListOf<java.util.Date>()
+        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd")
+
+        if (cursor.moveToFirst()) {
+            do {
+                dates.add(dateFormat.parse(cursor.getString(cursor.getColumnIndexOrThrow("workout_date"))))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+
+        if (dates.isEmpty()) return 0
+
+        var streak = 0
+        val today = java.util.Calendar.getInstance()
+        val lastWorkoutDate = java.util.Calendar.getInstance()
+
+        // Check if the most recent workout was today or yesterday
+        lastWorkoutDate.time = dates[0]
+        if (today.get(java.util.Calendar.YEAR) == lastWorkoutDate.get(java.util.Calendar.YEAR) &&
+            today.get(java.util.Calendar.DAY_OF_YEAR) == lastWorkoutDate.get(java.util.Calendar.DAY_OF_YEAR)) {
+            streak = 1
+        } else {
+            today.add(java.util.Calendar.DAY_OF_YEAR, -1)
+            if (today.get(java.util.Calendar.YEAR) == lastWorkoutDate.get(java.util.Calendar.YEAR) &&
+                today.get(java.util.Calendar.DAY_OF_YEAR) == lastWorkoutDate.get(java.util.Calendar.DAY_OF_YEAR)) {
+                streak = 1
+            } else {
+                return 0 // No workout today or yesterday, so streak is broken
+            }
+        }
+
+        val previousDate = java.util.Calendar.getInstance()
+        previousDate.time = dates[0]
+
+        for (i in 1 until dates.size) {
+            val currentDate = java.util.Calendar.getInstance()
+            currentDate.time = dates[i]
+
+            previousDate.add(java.util.Calendar.DAY_OF_YEAR, -1)
+            if (previousDate.get(java.util.Calendar.YEAR) == currentDate.get(java.util.Calendar.YEAR) &&
+                previousDate.get(java.util.Calendar.DAY_OF_YEAR) == currentDate.get(java.util.Calendar.DAY_OF_YEAR)) {
+                streak++
+                previousDate.time = dates[i] // Continue the chain
+            } else {
+                break // Streak is broken
+            }
+        }
+
+        return streak
+    }
+
+
+
     fun getAllExercises(): List<com.example.gymworkout.data.model.Exercise> {
         val exercises = mutableListOf<com.example.gymworkout.data.model.Exercise>()
         val db = this.readableDatabase
@@ -490,5 +641,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         contentValues.put("reps", reps)
         contentValues.put("weight_used", weight)
         db.update("SETS", contentValues, "set_id = ?", arrayOf(setId.toString()))
+    }
+
+    fun deleteSet(setId: Int) {
+        val db = this.writableDatabase
+        db.delete("SETS", "set_id = ?", arrayOf(setId.toString()))
     }
 }
