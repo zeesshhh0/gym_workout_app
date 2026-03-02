@@ -13,17 +13,16 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.example.gymworkout.R
-import com.example.gymworkout.data.db.DatabaseHelper
+import com.example.gymworkout.data.repository.WorkoutRepository
 import com.example.gymworkout.ui.login.LoginActivity
 import com.example.gymworkout.ui.profile.EditProfileActivity
 import com.google.firebase.auth.FirebaseAuth
 
 class ProfileFragment : Fragment() {
 
-    private lateinit var dbHelper: DatabaseHelper
+    private lateinit var repository: WorkoutRepository
     private lateinit var usernameTextView: TextView
     private lateinit var emailTextView: TextView
-    private var userId: String? = null
     private lateinit var auth: FirebaseAuth
 
     private val editProfileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -37,14 +36,13 @@ class ProfileFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_profile, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        dbHelper = DatabaseHelper(requireContext())
+        repository = WorkoutRepository(requireContext())
         auth = FirebaseAuth.getInstance()
 
         usernameTextView = view.findViewById(R.id.textViewUsername)
@@ -53,19 +51,14 @@ class ProfileFragment : Fragment() {
         val changePasswordButton = view.findViewById<Button>(R.id.buttonChangePassword)
         val logoutButton = view.findViewById<Button>(R.id.buttonLogout)
 
-        userId = auth.currentUser?.uid
-
         loadUserData()
 
         logoutButton.setOnClickListener {
-            // Firebase Sign Out
             auth.signOut()
-
-            // Clear SharedPreferences
+            
             val sharedPreferences = requireActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
             sharedPreferences.edit().clear().apply()
 
-            // Navigate to LoginActivity
             val intent = Intent(activity, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
@@ -83,12 +76,10 @@ class ProfileFragment : Fragment() {
     }
 
     private fun loadUserData() {
-        userId?.let { uid ->
-            val userDetails = dbHelper.getUserDetails(uid)
-            userDetails?.let {
-                usernameTextView.text = "Username: ${it.first}"
-                emailTextView.text = "Email: ${it.second}"
-            }
+        val userDetails = repository.getUserDetails()
+        userDetails?.let {
+            usernameTextView.text = "Username: ${it.first}"
+            emailTextView.text = "Email: ${it.second}"
         }
     }
 }

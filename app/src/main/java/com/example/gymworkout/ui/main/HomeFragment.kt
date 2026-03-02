@@ -9,22 +9,21 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.gymworkout.R
-import com.example.gymworkout.data.db.DatabaseHelper
+import com.example.gymworkout.data.repository.WorkoutRepository
 import com.example.gymworkout.ui.workout.SessionDetailActivity
 import com.example.gymworkout.ui.workout.WorkoutActivity
-import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
 class HomeFragment : Fragment() {
 
-    private lateinit var dbHelper: DatabaseHelper
+    private lateinit var repository: WorkoutRepository
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        dbHelper = DatabaseHelper(requireContext())
+        repository = WorkoutRepository(requireContext())
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
@@ -39,18 +38,14 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateUI(view: View) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid
-
-        if (userId == null) return
-
         // Greeting
         val greetingTextView = view.findViewById<TextView>(R.id.text_view_greeting)
-        val userName = dbHelper.getUserName(userId) ?: "User"
+        val userName = repository.getUserName() ?: "User"
         greetingTextView.text = getGreeting(userName)
 
         // Streak
         val streakTextView = view.findViewById<TextView>(R.id.text_view_streak)
-        val streak = dbHelper.calculateWorkoutStreak(userId)
+        val streak = repository.calculateWorkoutStreak()
         streakTextView.text = if (streak > 0) "$streak-day streak 🔥" else "Start a new workout!"
 
         val startWorkoutButton = view.findViewById<Button>(R.id.button_start_workout)
@@ -65,14 +60,14 @@ class HomeFragment : Fragment() {
         val lastWorkoutDate = view.findViewById<TextView>(R.id.text_view_last_workout_date)
         val lastWorkoutStats = view.findViewById<TextView>(R.id.text_view_last_workout_stats)
         val viewDetailsButton = view.findViewById<Button>(R.id.button_view_details)
-        val lastSession = dbHelper.getLatestWorkoutSession(userId)
+        val lastSession = repository.getLatestWorkoutSession()
 
         if (lastSession != null) {
             lastWorkoutCard.visibility = View.VISIBLE
             lastWorkoutName.text = lastSession.workoutName
             lastWorkoutDate.text = getRelativeDate(lastSession.date)
 
-            val stats = dbHelper.getSessionStats(lastSession.id)
+            val stats = repository.getSessionStats(lastSession.id)
             lastWorkoutStats.text = "⏱\uFE0F ${stats.getDurationText()} • \uD83C\uDFC3\u200D♂\uFE0F ${stats.exerciseCount} exercises • \uD83C\uDFCB\uFE0F ${String.format("%,.0f", stats.totalVolume)} kg volume"
 
             viewDetailsButton.setOnClickListener {

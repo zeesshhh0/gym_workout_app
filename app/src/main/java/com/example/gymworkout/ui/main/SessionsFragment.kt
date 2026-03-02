@@ -11,17 +11,16 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymworkout.R
-import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.data.model.WorkoutSession
+import com.example.gymworkout.data.repository.WorkoutRepository
 import com.example.gymworkout.ui.adapters.SessionAdapter
 import com.example.gymworkout.ui.workout.SessionDetailActivity
-import com.google.firebase.auth.FirebaseAuth
 
 class SessionsFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var sessionAdapter: SessionAdapter
-    private lateinit var dbHelper: DatabaseHelper
+    private lateinit var repository: WorkoutRepository
     private var sessions: List<WorkoutSession> = emptyList()
 
     private val sessionDetailLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -37,7 +36,7 @@ class SessionsFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_sessions, container, false)
 
-        dbHelper = DatabaseHelper(requireContext())
+        repository = WorkoutRepository(requireContext())
         refreshSessions()
 
         recyclerView = view.findViewById(R.id.sessionsRecyclerView)
@@ -53,12 +52,13 @@ class SessionsFragment : Fragment() {
     }
 
     private fun refreshSessions() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-        sessions = dbHelper.getAllWorkoutSessions(userId)
+        sessions = repository.getAllWorkoutSessions()
         if (::sessionAdapter.isInitialized) {
             sessionAdapter.updateData(sessions)
         }
     }
+
+
 
     override fun onResume() {
         super.onResume()

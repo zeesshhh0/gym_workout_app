@@ -8,13 +8,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymworkout.R
-import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.data.model.Exercise
+import com.example.gymworkout.data.repository.WorkoutRepository
 
 class SessionDetailExerciseAdapter(
     private var exercises: List<Exercise>,
     private val sessionId: Int,
-    private val dbHelper: DatabaseHelper,
+    private val repository: WorkoutRepository,
     private val showAddSetButton: Boolean = false
 ) : RecyclerView.Adapter<SessionDetailExerciseAdapter.ExerciseViewHolder>() {
 
@@ -42,7 +42,7 @@ class SessionDetailExerciseAdapter(
         }
 
         // Fetch sets for this exercise in this session
-        val sets = dbHelper.getSetsForExerciseInSession(sessionId, exercise.id)
+        val sets = repository.getSetsForExerciseInSession(sessionId, exercise.id)
         val setAdapter = SetAdapter(
             sets,
             onSetClick = { },

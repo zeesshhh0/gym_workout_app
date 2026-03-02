@@ -15,8 +15,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymworkout.R
-import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.data.model.Exercise
+import com.example.gymworkout.data.repository.WorkoutRepository
 import com.example.gymworkout.ui.adapters.ExerciseRecyclerAdapter
 import com.example.gymworkout.ui.exercise.AddExerciseActivity
 import com.example.gymworkout.ui.exercise.ExerciseInstructionsActivity
@@ -27,7 +27,7 @@ class ExercisesFragment : Fragment(), SearchView.OnQueryTextListener {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ExerciseRecyclerAdapter
     private lateinit var allExercises: MutableList<Exercise>
-    private lateinit var dbHelper: DatabaseHelper
+    private lateinit var repository: WorkoutRepository
     private lateinit var fabAddExercise: FloatingActionButton
 
     private val addExerciseLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -48,8 +48,8 @@ class ExercisesFragment : Fragment(), SearchView.OnQueryTextListener {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_exercises, container, false)
 
-        dbHelper = DatabaseHelper(requireContext())
-        allExercises = dbHelper.getAllExercises().toMutableList()
+        repository = WorkoutRepository(requireContext())
+        allExercises = repository.getAllExercises().toMutableList()
 
         recyclerView = view.findViewById(R.id.exercisesRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
@@ -91,7 +91,7 @@ class ExercisesFragment : Fragment(), SearchView.OnQueryTextListener {
 
     private fun refreshExercises() {
         allExercises.clear()
-        allExercises.addAll(dbHelper.getAllExercises())
+        allExercises.addAll(repository.getAllExercises())
         adapter.updateData(allExercises)
     }
 

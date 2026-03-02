@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.databinding.ActivityLoginBinding
 import com.example.gymworkout.ui.main.HomeActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -13,7 +12,6 @@ import com.google.firebase.auth.FirebaseAuth
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
-    private lateinit var dbHelper: DatabaseHelper
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,8 +31,6 @@ class LoginActivity : AppCompatActivity() {
 
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        dbHelper = DatabaseHelper(this)
 
         binding.login.setOnClickListener {
             with(binding) {

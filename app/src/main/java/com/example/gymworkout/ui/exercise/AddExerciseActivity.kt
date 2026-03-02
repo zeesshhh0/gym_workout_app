@@ -8,8 +8,8 @@ import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.gymworkout.R
-import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.data.model.MuscleGroup
+import com.example.gymworkout.data.repository.WorkoutRepository
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
@@ -18,6 +18,7 @@ class AddExerciseActivity : AppCompatActivity() {
 
     private lateinit var muscleGroups: List<MuscleGroup>
     private var selectedMuscleGroupId: Int = -1
+    private lateinit var repository: WorkoutRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,8 +35,8 @@ class AddExerciseActivity : AppCompatActivity() {
         val muscleGroupAutoCompleteTextView = findViewById<AutoCompleteTextView>(R.id.muscleGroupAutoCompleteTextView)
         val saveExerciseButton = findViewById<MaterialButton>(R.id.saveExerciseButton)
 
-        val dbHelper = DatabaseHelper(this)
-        muscleGroups = dbHelper.getAllMuscleGroups()
+        repository = WorkoutRepository(this)
+        muscleGroups = repository.getAllMuscleGroups()
         val muscleGroupNames = muscleGroups.map { it.name }
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, muscleGroupNames)
@@ -51,7 +52,7 @@ class AddExerciseActivity : AppCompatActivity() {
             val instructions = exerciseInstructionsEditText.text.toString()
 
             if (name.isNotEmpty() && description.isNotEmpty() && instructions.isNotEmpty() && selectedMuscleGroupId != -1) {
-                val id = dbHelper.addExercise(selectedMuscleGroupId, name, description, instructions)
+                val id = repository.addExercise(selectedMuscleGroupId, name, description, instructions)
                 if (id != -1L) {
                     Toast.makeText(this, "Exercise added successfully", Toast.LENGTH_SHORT).show()
                     setResult(Activity.RESULT_OK)

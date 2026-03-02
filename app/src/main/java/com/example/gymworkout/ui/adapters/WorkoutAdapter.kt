@@ -8,10 +8,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymworkout.R
-import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.data.model.Exercise
+import com.example.gymworkout.data.repository.WorkoutRepository
 
 class WorkoutAdapter(var exercises: List<Exercise>, private val showAddSetButton: Boolean = true) : RecyclerView.Adapter<WorkoutAdapter.ViewHolder>() {
+
+    private lateinit var repository: WorkoutRepository
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_exercise, parent, false)
@@ -30,19 +32,21 @@ class WorkoutAdapter(var exercises: List<Exercise>, private val showAddSetButton
             holder.addSetButton.visibility = View.GONE
         }
 
-        val dbHelper = DatabaseHelper(holder.itemView.context)
-        val sessionId = dbHelper.getOrCreateWorkoutSession(exercise.workoutId)
-        var sets = dbHelper.getSetsForExercise(sessionId, exercise.id)
+        if (!::repository.isInitialized) {
+            repository = WorkoutRepository(holder.itemView.context)
+        }
+        val sessionId = repository.getOrCreateWorkoutSession(exercise.workoutId)
+        var sets = repository.getSetsForExercise(sessionId, exercise.id)
         val setAdapter = SetAdapter(sets, { set ->
             showEditSetDialog(holder.itemView.context, set) {
                 // Refresh sets after editing
-                val updatedSets = dbHelper.getSetsForExercise(sessionId, exercise.id)
+                val updatedSets = repository.getSetsForExercise(sessionId, exercise.id)
                 (holder.setsRecyclerView.adapter as SetAdapter).updateData(updatedSets)
             }
         }, { set ->
             showDeleteSetDialog(holder.itemView.context, set) {
                 // Refresh sets after deleting
-                val updatedSets = dbHelper.getSetsForExercise(sessionId, exercise.id)
+                val updatedSets = repository.getSetsForExercise(sessionId, exercise.id)
                 (holder.setsRecyclerView.adapter as SetAdapter).updateData(updatedSets)
             }
         })
@@ -51,9 +55,9 @@ class WorkoutAdapter(var exercises: List<Exercise>, private val showAddSetButton
 
         holder.addSetButton.setOnClickListener {
             val nextSetNumber = sets.size + 1
-            dbHelper.addSet(exercise.workoutId, exercise.id, nextSetNumber, 0, 0f)
+            repository.addSet(exercise.workoutId, exercise.id, nextSetNumber, 0, 0f)
             // Refresh sets
-            sets = dbHelper.getSetsForExercise(sessionId, exercise.id)
+            sets = repository.getSetsForExercise(sessionId, exercise.id)
             (holder.setsRecyclerView.adapter as SetAdapter).updateData(sets)
         }
     }
@@ -63,8 +67,7 @@ class WorkoutAdapter(var exercises: List<Exercise>, private val showAddSetButton
         builder.setTitle("Delete Set")
         builder.setMessage("Are you sure you want to delete this set?")
         builder.setPositiveButton("Delete") { _, _ ->
-            val dbHelper = DatabaseHelper(context)
-            dbHelper.deleteSet(set.id)
+            repository.deleteSet(set.id)
             onSetDeleted()
         }
         builder.setNegativeButton("Cancel", null)
@@ -87,8 +90,7 @@ class WorkoutAdapter(var exercises: List<Exercise>, private val showAddSetButton
         builder.setPositiveButton("Save") { _, _ ->
             val newReps = repsEditText.text.toString().toIntOrNull() ?: set.reps
             val newWeight = weightEditText.text.toString().toFloatOrNull() ?: set.weightUsed
-            val dbHelper = DatabaseHelper(context)
-            dbHelper.updateSet(set.id, newReps, newWeight)
+            repository.updateSet(set.id, newReps, newWeight)
             onSetUpdated()
         }
         builder.setNegativeButton("Cancel", null)

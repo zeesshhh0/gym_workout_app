@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.gymworkout.data.db.DatabaseHelper
+import com.example.gymworkout.data.repository.WorkoutRepository
 import com.example.gymworkout.databinding.ActivitySignupBinding
 import com.example.gymworkout.ui.main.HomeActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -13,7 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 class SignupActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySignupBinding
-    private lateinit var dbHelper: DatabaseHelper
+    private lateinit var repository: WorkoutRepository
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,8 +23,8 @@ class SignupActivity : AppCompatActivity() {
 
         // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()
-        // Initialize DatabaseHelper
-        dbHelper = DatabaseHelper(this)
+        // Initialize Repository
+        repository = WorkoutRepository(this)
 
         binding.signup.setOnClickListener {
             with(binding) {
@@ -54,11 +54,8 @@ class SignupActivity : AppCompatActivity() {
                 auth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this@SignupActivity) { task ->
                         if (task.isSuccessful) {
-                            val user = auth.currentUser
-                            val uid = user?.uid ?: ""
-                            
                             // Save user to local DB
-                            dbHelper.addUser(uid, username, email, "")
+                            repository.addUser(username, email)
 
                             Toast.makeText(this@SignupActivity, "Signup successful!", Toast.LENGTH_SHORT).show()
 

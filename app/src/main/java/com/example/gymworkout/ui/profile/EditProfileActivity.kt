@@ -7,13 +7,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.example.gymworkout.R
-import com.example.gymworkout.data.db.DatabaseHelper
+import com.example.gymworkout.data.repository.WorkoutRepository
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 
 class EditProfileActivity : AppCompatActivity() {
 
-    private lateinit var dbHelper: DatabaseHelper
+    private lateinit var repository: WorkoutRepository
     private var userId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,19 +24,17 @@ class EditProfileActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        dbHelper = DatabaseHelper(this)
+        repository = WorkoutRepository(this)
         userId = FirebaseAuth.getInstance().currentUser?.uid
 
         val usernameEditText = findViewById<TextInputEditText>(R.id.editTextUsername)
         val emailEditText = findViewById<TextInputEditText>(R.id.editTextEmail)
         val saveButton = findViewById<Button>(R.id.buttonSave)
 
-        userId?.let { uid ->
-            val userDetails = dbHelper.getUserDetails(uid)
-            userDetails?.let {
-                usernameEditText.setText(it.first)
-                emailEditText.setText(it.second)
-            }
+        val userDetails = repository.getUserDetails()
+        userDetails?.let {
+            usernameEditText.setText(it.first)
+            emailEditText.setText(it.second)
         }
 
         saveButton.setOnClickListener {
@@ -44,12 +42,10 @@ class EditProfileActivity : AppCompatActivity() {
             val newEmail = emailEditText.text.toString().trim()
 
             if (newUsername.isNotEmpty() && newEmail.isNotEmpty()) {
-                userId?.let { uid ->
-                    dbHelper.updateUserDetails(uid, newUsername, newEmail)
-                    Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
-                    setResult(Activity.RESULT_OK)
-                    finish()
-                }
+                repository.updateUserDetails(newUsername, newEmail)
+                Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                setResult(Activity.RESULT_OK)
+                finish()
             } else {
                 Toast.makeText(this, "Username and email cannot be empty", Toast.LENGTH_SHORT).show()
             }

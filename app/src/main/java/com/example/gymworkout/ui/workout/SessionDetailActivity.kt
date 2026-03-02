@@ -8,13 +8,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymworkout.R
-import com.example.gymworkout.data.db.DatabaseHelper
+import com.example.gymworkout.data.repository.WorkoutRepository
 import com.example.gymworkout.ui.adapters.SessionDetailExerciseAdapter
 
 class SessionDetailActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var dbHelper: DatabaseHelper
+    private lateinit var repository: WorkoutRepository
     private var sessionId: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,7 +26,7 @@ class SessionDetailActivity : AppCompatActivity() {
         supportActionBar?.title = "Session Details"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        dbHelper = DatabaseHelper(this)
+        repository = WorkoutRepository(this)
         sessionId = intent.getIntExtra("session_id", -1)
 
         recyclerView = findViewById(R.id.sessionDetailRecyclerView)
@@ -34,8 +34,8 @@ class SessionDetailActivity : AppCompatActivity() {
 
         if (sessionId != -1) {
             // Fetch exercises for this session
-            val exercises = dbHelper.getExercisesForSession(sessionId)
-            val sessionDetailExerciseAdapter = SessionDetailExerciseAdapter(exercises, sessionId, dbHelper, false)
+            val exercises = repository.getExercisesForSession(sessionId)
+            val sessionDetailExerciseAdapter = SessionDetailExerciseAdapter(exercises, sessionId, repository, false)
             recyclerView.adapter = sessionDetailExerciseAdapter
         }
     }
@@ -71,7 +71,7 @@ class SessionDetailActivity : AppCompatActivity() {
     }
 
     private fun deleteSession() {
-        dbHelper.deleteWorkoutSession(sessionId)
+        repository.deleteWorkoutSession(sessionId)
         setResult(RESULT_OK)
         finish() // Close the activity after deletion
     }

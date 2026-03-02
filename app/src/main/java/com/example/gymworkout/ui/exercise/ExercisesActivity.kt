@@ -8,8 +8,8 @@ import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymworkout.R
-import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.data.model.Exercise
+import com.example.gymworkout.data.repository.WorkoutRepository
 import com.example.gymworkout.ui.adapters.ExerciseRecyclerAdapter
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -19,6 +19,7 @@ class ExercisesActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ExerciseRecyclerAdapter
     private lateinit var exercises: List<Exercise>
+    private lateinit var repository: WorkoutRepository
     private var workoutId: Long = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,8 +31,8 @@ class ExercisesActivity : AppCompatActivity() {
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        val dbHelper = DatabaseHelper(this)
-        exercises = dbHelper.getAllExercises()
+        repository = WorkoutRepository(this)
+        exercises = repository.getAllExercises()
 
         recyclerView = findViewById(R.id.exercisesListView)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -39,7 +40,7 @@ class ExercisesActivity : AppCompatActivity() {
             exercises = exercises,
             onItemClick = { exercise ->
                 if (workoutId != -1L) {
-                    dbHelper.addExerciseToWorkout(workoutId.toInt(), exercise.id)
+                    repository.addExerciseToWorkout(workoutId.toInt(), exercise.id)
                     finish()
                 }
             }, showAddSetButton = false
@@ -55,8 +56,7 @@ class ExercisesActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val dbHelper = DatabaseHelper(this)
-        exercises = dbHelper.getAllExercises()
+        exercises = repository.getAllExercises()
         adapter.updateData(exercises)
     }
 

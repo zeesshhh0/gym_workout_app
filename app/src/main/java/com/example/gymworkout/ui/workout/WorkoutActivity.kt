@@ -10,10 +10,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymworkout.R
-import com.example.gymworkout.data.db.DatabaseHelper
+import com.example.gymworkout.data.repository.WorkoutRepository
 import com.example.gymworkout.ui.adapters.WorkoutAdapter
 import com.example.gymworkout.ui.exercise.ExercisesActivity
-import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -24,7 +23,7 @@ class WorkoutActivity : AppCompatActivity() {
     private lateinit var buttonAddExercise: Button
     private lateinit var buttonFinishWorkout: Button
     private lateinit var editTextWorkoutName: EditText
-    private lateinit var dbHelper: DatabaseHelper
+    private lateinit var repository: WorkoutRepository
     private var workoutId: Long = -1
     private var sessionId: Int = -1
 
@@ -35,22 +34,21 @@ class WorkoutActivity : AppCompatActivity() {
         val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        dbHelper = DatabaseHelper(this)
+        repository = WorkoutRepository(this)
 
         workoutId = intent.getLongExtra("workoutId", -1)
         if (workoutId == -1L) {
-            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-            workoutId = dbHelper.addWorkout(userId, "New Workout", "")
-            sessionId = dbHelper.getOrCreateWorkoutSession(workoutId.toInt())
+            workoutId = repository.addWorkout("New Workout", "")
+            sessionId = repository.getOrCreateWorkoutSession(workoutId.toInt())
         } else {
-            sessionId = dbHelper.getOrCreateWorkoutSession(workoutId.toInt())
+            sessionId = repository.getOrCreateWorkoutSession(workoutId.toInt())
         }
 
         editTextWorkoutName = findViewById(R.id.editTextWorkoutName)
-        editTextWorkoutName.setText(dbHelper.getWorkoutName(workoutId))
+        editTextWorkoutName.setText(repository.getWorkoutName(workoutId))
         editTextWorkoutName.addTextChangedListener(object : android.text.TextWatcher {
             override fun afterTextChanged(s: android.text.Editable?) {
-                dbHelper.updateWorkoutName(workoutId, s.toString())
+                repository.updateWorkoutName(workoutId, s.toString())
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -63,7 +61,7 @@ class WorkoutActivity : AppCompatActivity() {
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val exercises = dbHelper.getExercisesForWorkout(workoutId.toInt())
+        val exercises = repository.getExercisesForWorkout(workoutId.toInt())
         workoutAdapter = WorkoutAdapter(exercises, true)
         recyclerView.adapter = workoutAdapter
 
@@ -74,12 +72,12 @@ class WorkoutActivity : AppCompatActivity() {
         }
 
         buttonFinishWorkout.setOnClickListener {
-            val exercises = dbHelper.getExercisesForWorkout(workoutId.toInt())
+            val exercises = repository.getExercisesForWorkout(workoutId.toInt())
             if (exercises.isEmpty()) {
-                dbHelper.deleteWorkoutAndSession(workoutId, sessionId)
+                repository.deleteWorkoutAndSession(workoutId, sessionId)
             } else {
                 val timeFormat = SimpleDateFormat("HH:mm:ss")
-                dbHelper.updateWorkoutSessionEndTime(sessionId, timeFormat.format(Date()))
+                repository.updateWorkoutSessionEndTime(sessionId, timeFormat.format(Date()))
             }
             setResult(RESULT_OK)
             finish()
@@ -93,7 +91,7 @@ class WorkoutActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val exercises = dbHelper.getExercisesForWorkout(workoutId.toInt())
+        val exercises = repository.getExercisesForWorkout(workoutId.toInt())
         workoutAdapter.exercises = exercises
         workoutAdapter.notifyDataSetChanged()
     }
@@ -119,19 +117,19 @@ class WorkoutActivity : AppCompatActivity() {
     }
 
     private fun finishWorkout() {
-        val exercises = dbHelper.getExercisesForWorkout(workoutId.toInt())
+        val exercises = repository.getExercisesForWorkout(workoutId.toInt())
         if (exercises.isEmpty()) {
-            dbHelper.deleteWorkoutAndSession(workoutId, sessionId)
+            repository.deleteWorkoutAndSession(workoutId, sessionId)
         } else {
             val timeFormat = SimpleDateFormat("HH:mm:ss")
-            dbHelper.updateWorkoutSessionEndTime(sessionId, timeFormat.format(Date()))
+            repository.updateWorkoutSessionEndTime(sessionId, timeFormat.format(Date()))
         }
         setResult(RESULT_OK)
         finish()
     }
 
     private fun deleteWorkout() {
-        dbHelper.deleteWorkoutAndSession(workoutId, sessionId)
+        repository.deleteWorkoutAndSession(workoutId, sessionId)
         setResult(RESULT_OK)
         finish()
     }
