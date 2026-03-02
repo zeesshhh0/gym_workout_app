@@ -19,6 +19,11 @@ class WorkoutRepository(context: Context) {
     private val currentUserId: String
         get() = auth.currentUser?.uid ?: ""
 
+    fun setSyncListeners(onFailure: (String) -> Unit, onUnauthenticated: () -> Unit) {
+        firestoreSyncManager.onSyncFailure = onFailure
+        firestoreSyncManager.onUnauthenticated = onUnauthenticated
+    }
+
     // User methods
     fun getUserName(): String? = dbHelper.getUserName(currentUserId)
     fun getUserDetails(): Pair<String, String>? = dbHelper.getUserDetails(currentUserId)
@@ -109,6 +114,11 @@ class WorkoutRepository(context: Context) {
         dbHelper.deleteSet(currentUserId, setId)
 
     fun clearAllData() = dbHelper.clearAllData(currentUserId)
+
+    fun hasLocalData(): Boolean {
+        return dbHelper.getAllWorkoutSessions(currentUserId).isNotEmpty() || 
+               dbHelper.getLatestWorkoutForUser(currentUserId) != null
+    }
 
     fun restoreUserData(data: List<FirestoreSyncManager.WorkoutData>) {
         dbHelper.clearAllData(currentUserId)

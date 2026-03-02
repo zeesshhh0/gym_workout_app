@@ -88,3 +88,9 @@ The app now features robust cloud synchronization, backing up local SQLite data 
 
 ### Data Restoration
 Users can restore their data across devices using the **"Restore from Cloud"** button located in the `ProfileFragment`. This initiates a full recursive fetch of their Firestore graph, clears the local SQLite user data, and seamlessly re-inserts the cloud records into the local database using `CONFLICT_REPLACE`.
+
+### Resilience & Error Handling
+- **Offline Mode:** Firestore persistence is enabled, allowing the app to queue writes while offline and automatically sync upon reconnection.
+- **Auto-Restore on Login:** Upon logging into an existing account (not during signup), the app automatically checks for cloud data. If the local database is empty, it restores the cloud data; if local data exists, it prompts the user to choose between their local or cloud versions.
+- **Sync Safety:** All Firestore writes are guarded by authentication checks. Failures are logged with their document paths and reported to the user via non-blocking Snackbars, ensuring the app remains fully functional locally even if cloud sync is temporarily unavailable.
+- **Data Integrity:** The restoration process uses the `CONFLICT_REPLACE` strategy in SQLite, ensuring that duplicate records are safely overwritten during the sync process.

@@ -13,6 +13,8 @@ import com.example.gymworkout.R
 import com.example.gymworkout.data.repository.WorkoutRepository
 import com.example.gymworkout.ui.adapters.WorkoutAdapter
 import com.example.gymworkout.ui.exercise.ExercisesActivity
+import com.example.gymworkout.ui.login.LoginActivity
+import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -35,6 +37,14 @@ class WorkoutActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         repository = WorkoutRepository(this)
+        repository.setSyncListeners(
+            onFailure = { message ->
+                Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG).show()
+            },
+            onUnauthenticated = {
+                redirectToLogin()
+            }
+        )
 
         workoutId = intent.getLongExtra("workoutId", -1)
         if (workoutId == -1L) {
@@ -131,6 +141,13 @@ class WorkoutActivity : AppCompatActivity() {
     private fun deleteWorkout() {
         repository.deleteWorkoutAndSession(workoutId, sessionId)
         setResult(RESULT_OK)
+        finish()
+    }
+
+    private fun redirectToLogin() {
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
         finish()
     }
 }

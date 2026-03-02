@@ -1,5 +1,6 @@
 package com.example.gymworkout.data.sync
 
+import android.util.Log
 import com.example.gymworkout.data.model.Exercise
 import com.example.gymworkout.data.model.Set
 import com.example.gymworkout.data.model.Workout
@@ -14,29 +15,52 @@ class FirestoreSyncManager {
     private val auth = FirebaseAuth.getInstance()
     private val uid: String? get() = auth.currentUser?.uid
 
+    // Callbacks to notify UI
+    var onSyncFailure: ((String) -> Unit)? = null
+    var onUnauthenticated: (() -> Unit)? = null
+
+    private fun getUidOrAbort(): String? {
+        val currentUid = uid
+        if (currentUid == null) {
+            Log.e("FirestoreSyncManager", "Operation aborted: UID is null. Redirecting to login.")
+            onUnauthenticated?.invoke()
+            return null
+        }
+        return currentUid
+    }
+
     private val userDoc: DocumentReference?
-        get() = uid?.let { firestore.collection("users").document(it) }
+        get() = getUidOrAbort()?.let { firestore.collection("users").document(it) }
 
     fun syncWorkout(workout: Workout) {
         val doc = userDoc?.collection("workouts")?.document(workout.id.toString())
-        doc?.set(workout.toFirestoreMap(), SetOptions.merge())
+        doc?.set(workout.toFirestoreMap(), SetOptions.merge())?.addOnFailureListener { e ->
+            Log.e("FirestoreSyncManager", "Sync failed for workout: ${doc.path}", e)
+            onSyncFailure?.invoke("Sync failed. Your data is saved locally.")
+        }
     }
 
     fun syncSession(session: WorkoutSession, workoutId: String) {
         val doc = userDoc?.collection("workouts")?.document(workoutId)
             ?.collection("sessions")?.document(session.id.toString())
-        doc?.set(session.toFirestoreMap(), SetOptions.merge())
+        doc?.set(session.toFirestoreMap(), SetOptions.merge())?.addOnFailureListener { e ->
+            Log.e("FirestoreSyncManager", "Sync failed for session: ${doc?.path}", e)
+            onSyncFailure?.invoke("Sync failed. Your data is saved locally.")
+        }
     }
 
     fun syncExerciseSets(exercise: Exercise, sessionId: String, workoutId: String, sets: List<Set>) {
         val doc = userDoc?.collection("workouts")?.document(workoutId)
             ?.collection("sessions")?.document(sessionId)
             ?.collection("exercises")?.document(exercise.id.toString())
-        doc?.set(exercise.toFirestoreMap(sets), SetOptions.merge())
+        doc?.set(exercise.toFirestoreMap(sets), SetOptions.merge())?.addOnFailureListener { e ->
+            Log.e("FirestoreSyncManager", "Sync failed for exercise sets: ${doc?.path}", e)
+            onSyncFailure?.invoke("Sync failed. Your data is saved locally.")
+        }
     }
 
     fun fetchAllUserData(onSuccess: (List<WorkoutData>) -> Unit, onFailure: (Exception) -> Unit) {
-        val uid = this.uid ?: run {
+        val uid = getUidOrAbort() ?: run {
             onFailure(Exception("User not authenticated"))
             return
         }
@@ -134,7 +158,13 @@ class FirestoreSyncManager {
                 batch.delete(exercise.reference)
             }
             batch.delete(sessionDoc)
-            batch.commit()
+            batch.commit().addOnFailureListener { e ->
+                Log.e("FirestoreSyncManager", "Delete failed for session: ${sessionDoc.path}", e)
+                onSyncFailure?.invoke("Delete sync failed. Your data is saved locally.")
+            }
+        }.addOnFailureListener { e ->
+            Log.e("FirestoreSyncManager", "Failed to fetch exercises for deletion: ${sessionDoc.path}", e)
+            onSyncFailure?.invoke("Delete sync failed. Your data is saved locally.")
         }
     }
 }
