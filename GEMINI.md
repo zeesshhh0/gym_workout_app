@@ -5,7 +5,7 @@ This project is a comprehensive Android application designed for gym workout tra
 ## 🛠 Project Versions & Tech Stack
 
 - **Android Gradle Plugin (AGP):** 8.8.1
-- **Kotlin:** 1.9.24
+- **Kotlin:** 2.1.0
 - **Compile/Target SDK:** 35
 - **Minimum SDK:** 28
 - **JVM Target:** 11

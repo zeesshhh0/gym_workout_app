@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.zeeshan.gymworkout"
+    namespace = "com.example.gymworkout"
     compileSdk = 35
 
     defaultConfig {
