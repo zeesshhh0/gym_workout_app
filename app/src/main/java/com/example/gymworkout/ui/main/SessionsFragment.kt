@@ -58,8 +58,6 @@ class SessionsFragment : Fragment() {
         }
     }
 
-
-
     override fun onResume() {
         super.onResume()
         refreshSessions()

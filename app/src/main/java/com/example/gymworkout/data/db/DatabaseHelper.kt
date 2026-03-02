@@ -681,4 +681,75 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val db = this.writableDatabase
         db.delete("SETS", "set_id = ? AND user_id = ?", arrayOf(setId.toString(), userId))
     }
+
+    fun clearAllData(userId: String) {
+        val db = this.writableDatabase
+        db.beginTransaction()
+        try {
+            db.delete("SETS", "user_id = ?", arrayOf(userId))
+            db.delete("WORKOUT_SESSIONS", "user_id = ?", arrayOf(userId))
+            db.delete("WORKOUT_EXERCISE", "user_id = ?", arrayOf(userId))
+            db.delete("WORKOUT", "user_id = ?", arrayOf(userId))
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
+    fun restoreData(userId: String, workoutData: List<com.example.gymworkout.data.sync.FirestoreSyncManager.WorkoutData>) {
+        val db = this.writableDatabase
+        db.beginTransaction()
+        try {
+            workoutData.forEach { wData ->
+                val w = wData.workout
+                val workoutValues = ContentValues()
+                workoutValues.put("workout_id", w.id)
+                workoutValues.put("user_id", userId)
+                workoutValues.put("workout_name", w.name)
+                workoutValues.put("description", w.description)
+                db.insertWithOnConflict("WORKOUT", null, workoutValues, SQLiteDatabase.CONFLICT_REPLACE)
+
+                wData.sessions.forEach { sData ->
+                    val s = sData.session
+                    val sessionValues = ContentValues()
+                    sessionValues.put("session_id", s.id)
+                    sessionValues.put("workout_id", s.workoutId)
+                    sessionValues.put("workout_date", s.date)
+                    sessionValues.put("start_time", s.startTime)
+                    sessionValues.put("end_time", s.endTime)
+                    sessionValues.put("notes", s.notes)
+                    sessionValues.put("user_id", userId)
+                    db.insertWithOnConflict("WORKOUT_SESSIONS", null, sessionValues, SQLiteDatabase.CONFLICT_REPLACE)
+
+                    sData.exercises.forEach { eData ->
+                        val e = eData.exercise
+                        // Ensure exercise exists in EXERCISES (it's shared, but good to check or at least assume it's there)
+                        // If it's a custom exercise, it should be in EXERCISES table.
+                        
+                        // Link exercise to workout in WORKOUT_EXERCISE
+                        val weValues = ContentValues()
+                        weValues.put("workout_id", w.id)
+                        weValues.put("exercise_id", e.id)
+                        weValues.put("user_id", userId)
+                        db.insertWithOnConflict("WORKOUT_EXERCISE", null, weValues, SQLiteDatabase.CONFLICT_REPLACE)
+
+                        eData.sets.forEach { set ->
+                            val setValues = ContentValues()
+                            if (set.id != 0) setValues.put("set_id", set.id)
+                            setValues.put("session_id", s.id)
+                            setValues.put("exercise_id", e.id)
+                            setValues.put("set_number", set.setNumber)
+                            setValues.put("reps", set.reps)
+                            setValues.put("weight_used", set.weightUsed)
+                            setValues.put("user_id", userId)
+                            db.insertWithOnConflict("SETS", null, setValues, SQLiteDatabase.CONFLICT_REPLACE)
+                        }
+                    }
+                }
+            }
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
 }

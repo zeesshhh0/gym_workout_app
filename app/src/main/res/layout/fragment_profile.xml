@@ -89,6 +89,20 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/buttonEditProfile" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonRestoreCloud"
+            style="@style/Widget.Material3.Button.ElevatedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:paddingVertical="14dp"
+            android:text="Restore from Cloud"
+            android:textAppearance="?attr/textAppearanceLabelLarge"
+            app:icon="@android:drawable/ic_menu_upload"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/buttonChangePassword" />
+
         <!-- Logout Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonLogout"
@@ -104,7 +118,7 @@
             app:icon="@android:drawable/ic_delete"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/buttonChangePassword" />
+            app:layout_constraintTop_toBottomOf="@id/buttonRestoreCloud" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

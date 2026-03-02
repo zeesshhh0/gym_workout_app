@@ -69,3 +69,22 @@ The project follows a traditional Android architecture using Activities and Frag
 - **Unit Tests:** Located in `src/test/java/` (e.g., `ExampleUnitTest.kt`).
 - **Instrumentation Tests:** Located in `src/androidTest/java/` (e.g., `ExampleInstrumentedTest.kt`).
 - Use `DatabaseHelper` sample data (inserted in `onCreate`) to quickly verify UI components during development.
+
+---
+
+## ☁️ Cloud Synchronization (Firestore)
+
+The app now features robust cloud synchronization, backing up local SQLite data to **Firebase Firestore**.
+
+### Sync Architecture
+- **Local First:** SQLite remains the immediate source of truth for all operations to ensure offline functionality.
+- **Cloud Backup:** Data is synced to Firestore under the following path structure:
+  `users/{uid}/workouts/{workoutId}/sessions/{sessionId}/exercises/{exerciseId}`
+- **Trigger Points:** Background sync occurs automatically when a user creates a workout, completes a session, or deletes records. This is handled transparently within the `WorkoutRepository`.
+
+### Key Components
+- `data/sync/FirestoreSyncManager.kt`: Handles all direct interactions with the Firestore SDK, including nested document retrieval for restoration and batched deletes.
+- `data/sync/FirestoreMappers.kt`: Contains extension functions to convert Kotlin data models into Firestore-compatible `HashMap`s before writing.
+
+### Data Restoration
+Users can restore their data across devices using the **"Restore from Cloud"** button located in the `ProfileFragment`. This initiates a full recursive fetch of their Firestore graph, clears the local SQLite user data, and seamlessly re-inserts the cloud records into the local database using `CONFLICT_REPLACE`.
