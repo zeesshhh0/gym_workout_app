@@ -1,16 +1,14 @@
 package com.example.gymworkout.ui.main
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-
 import com.example.gymworkout.R
 import com.example.gymworkout.databinding.ActivityHomeBinding
 import com.example.gymworkout.ui.login.LoginActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
 
 class HomeActivity : AppCompatActivity() {
 
@@ -19,11 +17,8 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Check if user is logged in
-        val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        val isLoggedIn = sharedPreferences.getBoolean("is_logged_in", false)
-
-        if (!isLoggedIn) {
+        // Check if user is logged in via Firebase
+        if (FirebaseAuth.getInstance().currentUser == null) {
             val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)

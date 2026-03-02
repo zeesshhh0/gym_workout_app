@@ -1,6 +1,5 @@
 package com.example.gymworkout.ui.login
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
@@ -9,17 +8,21 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.databinding.ActivitySignupBinding
 import com.example.gymworkout.ui.main.HomeActivity
+import com.google.firebase.auth.FirebaseAuth
 
 class SignupActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySignupBinding
     private lateinit var dbHelper: DatabaseHelper
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySignupBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Initialize Firebase Auth
+        auth = FirebaseAuth.getInstance()
         // Initialize DatabaseHelper
         dbHelper = DatabaseHelper(this)
 
@@ -47,25 +50,30 @@ class SignupActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
-                val userId = dbHelper.addUser(username, email, password)
-                if (userId.toInt() != -1) {
-                    // Save user session
-                    val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-                    val editor = sharedPreferences.edit()
-                    editor.putInt("user_id", userId.toInt())
-                    editor.putBoolean("is_logged_in", true)
-                    editor.apply()
+                // Firebase Auth signup
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this@SignupActivity) { task ->
+                        if (task.isSuccessful) {
+                            val user = auth.currentUser
+                            val uid = user?.uid ?: ""
+                            
+                            // Save user to local DB
+                            dbHelper.addUser(uid, username, email, "")
 
-                    Toast.makeText(this@SignupActivity, "Signup successful!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@SignupActivity, "Signup successful!", Toast.LENGTH_SHORT).show()
 
-                    // Navigate to HomeActivity
-                    val intent = Intent(this@SignupActivity, HomeActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                    finish()
-                } else {
-                    emailLayout.error = "Signup failed. Email might already be in use."
-                }
+                            // Navigate to HomeActivity
+                            val intent = Intent(this@SignupActivity, HomeActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            startActivity(intent)
+                            finish()
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            val errorMessage = task.exception?.message ?: "Signup failed."
+                            Toast.makeText(this@SignupActivity, errorMessage, Toast.LENGTH_LONG).show()
+                            emailLayout.error = errorMessage
+                        }
+                    }
             }
         }
 

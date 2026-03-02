@@ -15,6 +15,7 @@ import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.data.model.WorkoutSession
 import com.example.gymworkout.ui.adapters.SessionAdapter
 import com.example.gymworkout.ui.workout.SessionDetailActivity
+import com.google.firebase.auth.FirebaseAuth
 
 class SessionsFragment : Fragment() {
 
@@ -52,8 +53,7 @@ class SessionsFragment : Fragment() {
     }
 
     private fun refreshSessions() {
-        val sharedPreferences = requireActivity().getSharedPreferences("user_prefs", android.content.Context.MODE_PRIVATE)
-        val userId = sharedPreferences.getInt("user_id", -1)
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         sessions = dbHelper.getAllWorkoutSessions(userId)
         if (::sessionAdapter.isInitialized) {
             sessionAdapter.updateData(sessions)

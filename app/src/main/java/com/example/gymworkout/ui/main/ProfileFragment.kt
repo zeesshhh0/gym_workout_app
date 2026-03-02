@@ -16,13 +16,15 @@ import com.example.gymworkout.R
 import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.ui.login.LoginActivity
 import com.example.gymworkout.ui.profile.EditProfileActivity
+import com.google.firebase.auth.FirebaseAuth
 
 class ProfileFragment : Fragment() {
 
     private lateinit var dbHelper: DatabaseHelper
     private lateinit var usernameTextView: TextView
     private lateinit var emailTextView: TextView
-    private var userId: Int = -1
+    private var userId: String? = null
+    private lateinit var auth: FirebaseAuth
 
     private val editProfileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -43,6 +45,7 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         dbHelper = DatabaseHelper(requireContext())
+        auth = FirebaseAuth.getInstance()
 
         usernameTextView = view.findViewById(R.id.textViewUsername)
         emailTextView = view.findViewById(R.id.textViewEmail)
@@ -50,13 +53,16 @@ class ProfileFragment : Fragment() {
         val changePasswordButton = view.findViewById<Button>(R.id.buttonChangePassword)
         val logoutButton = view.findViewById<Button>(R.id.buttonLogout)
 
-        val sharedPreferences = requireActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        userId = sharedPreferences.getInt("user_id", -1)
+        userId = auth.currentUser?.uid
 
         loadUserData()
 
         logoutButton.setOnClickListener {
+            // Firebase Sign Out
+            auth.signOut()
+
             // Clear SharedPreferences
+            val sharedPreferences = requireActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
             sharedPreferences.edit().clear().apply()
 
             // Navigate to LoginActivity
@@ -77,8 +83,8 @@ class ProfileFragment : Fragment() {
     }
 
     private fun loadUserData() {
-        if (userId != -1) {
-            val userDetails = dbHelper.getUserDetails(userId)
+        userId?.let { uid ->
+            val userDetails = dbHelper.getUserDetails(uid)
             userDetails?.let {
                 usernameTextView.text = "Username: ${it.first}"
                 emailTextView.text = "Email: ${it.second}"

@@ -9,17 +9,17 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     companion object {
         private const val DATABASE_NAME = "gymworkout1.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 3
     }
 
     override fun onCreate(db: SQLiteDatabase) {
         // Create tables here
         db.execSQL("""
             CREATE TABLE USERS (
-                user_id INTEGER PRIMARY KEY,
+                user_id TEXT PRIMARY KEY,
                 username TEXT NOT NULL,
                 email TEXT NOT NULL UNIQUE,
-                password_hash TEXT NOT NULL,
+                password_hash TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """.trimIndent())
@@ -47,7 +47,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL("""
             CREATE TABLE WORKOUT (
                 workout_id INTEGER PRIMARY KEY,
-                user_id INTEGER NOT NULL,
+                user_id TEXT NOT NULL,
                 workout_name TEXT NOT NULL,
                 description TEXT,
                 FOREIGN KEY (user_id) REFERENCES USERS(user_id)
@@ -93,8 +93,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL("""
             INSERT INTO USERS (user_id, username, email, password_hash, created_at)
             VALUES
-            (1, 'FitJohn2024', 'john@example.com', 'hash_john_123', '2025-09-01 10:00:00'),
-            (2, 'StrongSara', 'sara@example.com', 'hash_sara_123', '2025-09-05 14:30:00')
+            ('uid_john', 'FitJohn2024', 'john@example.com', 'hash_john_123', '2025-09-01 10:00:00'),
+            ('uid_sara', 'StrongSara', 'sara@example.com', 'hash_sara_123', '2025-09-05 14:30:00')
         """.trimIndent())
 
         db.execSQL("""
@@ -138,8 +138,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL("""
             INSERT INTO WORKOUT (workout_id, user_id, workout_name, description)
             VALUES
-            (1, 1, 'Morning Workout', 'A workout to start the day'),
-            (2, 2, 'Evening Workout', 'A workout to end the day')
+            (1, 'uid_john', 'Morning Workout', 'A workout to start the day'),
+            (2, 'uid_sara', 'Evening Workout', 'A workout to end the day')
         """.trimIndent())
 
         db.execSQL("""
@@ -181,21 +181,22 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         onCreate(db)
     }
 
-    fun addUser(username: String, email: String, password_hash: String): Long {
+    fun addUser(userId: String, username: String, email: String, password_hash: String): Long {
         val db = this.writableDatabase
         val contentValues = ContentValues()
+        contentValues.put("user_id", userId)
         contentValues.put("username", username)
         contentValues.put("email", email)
         contentValues.put("password_hash", password_hash)
         return db.insert("USERS", null, contentValues)
     }
 
-    fun checkUser(email: String, password_hash: String): Int {
+    fun checkUser(email: String, password_hash: String): String? {
         val db = this.readableDatabase
         val cursor = db.rawQuery("SELECT * FROM USERS WHERE email = ? AND password_hash = ?", arrayOf(email, password_hash))
-        var userId = -1
+        var userId: String? = null
         if (cursor.moveToFirst()) {
-            userId = cursor.getInt(cursor.getColumnIndexOrThrow("user_id"))
+            userId = cursor.getString(cursor.getColumnIndexOrThrow("user_id"))
         }
         cursor.close()
         return userId
@@ -209,9 +210,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return count > 0
     }
 
-    fun getUserName(userId: Int): String? {
+    fun getUserName(userId: String): String? {
         val db = this.readableDatabase
-        val cursor = db.rawQuery("SELECT username FROM USERS WHERE user_id = ?", arrayOf(userId.toString()))
+        val cursor = db.rawQuery("SELECT username FROM USERS WHERE user_id = ?", arrayOf(userId))
         var username: String? = null
         if (cursor.moveToFirst()) {
             username = cursor.getString(cursor.getColumnIndexOrThrow("username"))
@@ -220,22 +221,22 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return username
     }
 
-    fun getLatestWorkoutForUser(userId: Int): com.example.gymworkout.data.model.Workout? {
+    fun getLatestWorkoutForUser(userId: String): com.example.gymworkout.data.model.Workout? {
         val db = this.readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM WORKOUT WHERE user_id = ? ORDER BY workout_id DESC LIMIT 1", arrayOf(userId.toString()))
+        val cursor = db.rawQuery("SELECT * FROM WORKOUT WHERE user_id = ? ORDER BY workout_id DESC LIMIT 1", arrayOf(userId))
         var workout: com.example.gymworkout.data.model.Workout? = null
         if (cursor.moveToFirst()) {
             val id = cursor.getInt(cursor.getColumnIndexOrThrow("workout_id"))
             val name = cursor.getString(cursor.getColumnIndexOrThrow("workout_name"))
             val description = cursor.getString(cursor.getColumnIndexOrThrow("description"))
             workout = com.example.gymworkout.data.model.Workout(id,
-                userId.toString(), name, description)
+                userId, name, description)
         }
         cursor.close()
         return workout
     }
 
-    fun getLatestWorkoutSession(userId: Int): com.example.gymworkout.data.model.WorkoutSession? {
+    fun getLatestWorkoutSession(userId: String): com.example.gymworkout.data.model.WorkoutSession? {
         val db = this.readableDatabase
         val cursor = db.rawQuery("""
         SELECT ws.*, w.workout_name FROM WORKOUT_SESSIONS ws
@@ -243,7 +244,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         WHERE w.user_id = ?
         ORDER BY ws.workout_date DESC, ws.start_time DESC
         LIMIT 1
-    """, arrayOf(userId.toString()))
+    """, arrayOf(userId))
 
         var session: com.example.gymworkout.data.model.WorkoutSession? = null
         if (cursor.moveToFirst()) {
@@ -298,14 +299,14 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return com.example.gymworkout.data.model.SessionStats(durationMinutes, exerciseCount, totalVolume)
     }
 
-    fun calculateWorkoutStreak(userId: Int): Int {
+    fun calculateWorkoutStreak(userId: String): Int {
         val db = this.readableDatabase
         val cursor = db.rawQuery("""
         SELECT DISTINCT workout_date FROM WORKOUT_SESSIONS ws
         JOIN WORKOUT w ON ws.workout_id = w.workout_id
         WHERE w.user_id = ?
         ORDER BY workout_date DESC
-    """, arrayOf(userId.toString()))
+    """, arrayOf(userId))
 
         val dates = mutableListOf<java.util.Date>()
         val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd")
@@ -358,9 +359,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return streak
     }
 
-    fun getUserDetails(userId: Int): Pair<String, String>? {
+    fun getUserDetails(userId: String): Pair<String, String>? {
         val db = this.readableDatabase
-        val cursor = db.rawQuery("SELECT username, email FROM USERS WHERE user_id = ?", arrayOf(userId.toString()))
+        val cursor = db.rawQuery("SELECT username, email FROM USERS WHERE user_id = ?", arrayOf(userId))
         var userDetails: Pair<String, String>? = null
         if (cursor.moveToFirst()) {
             val username = cursor.getString(cursor.getColumnIndexOrThrow("username"))
@@ -371,12 +372,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return userDetails
     }
 
-    fun updateUserDetails(userId: Int, username: String, email: String) {
+    fun updateUserDetails(userId: String, username: String, email: String) {
         val db = this.writableDatabase
         val contentValues = ContentValues()
         contentValues.put("username", username)
         contentValues.put("email", email)
-        db.update("USERS", contentValues, "user_id = ?", arrayOf(userId.toString()))
+        db.update("USERS", contentValues, "user_id = ?", arrayOf(userId))
     }
 
 
@@ -437,7 +438,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return db.insert("EXERCISES", null, contentValues)
     }
 
-    fun addWorkout(userId: Int, workoutName: String, description: String): Long {
+    fun addWorkout(userId: String, workoutName: String, description: String): Long {
         val db = this.writableDatabase
         val contentValues = ContentValues()
         contentValues.put("user_id", userId)
@@ -561,7 +562,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return sets
     }
 
-    fun getAllWorkoutSessions(userId: Int): List<com.example.gymworkout.data.model.WorkoutSession> {
+    fun getAllWorkoutSessions(userId: String): List<com.example.gymworkout.data.model.WorkoutSession> {
         val sessions = mutableListOf<com.example.gymworkout.data.model.WorkoutSession>()
         val db = this.readableDatabase
         val cursor = db.rawQuery("""
@@ -570,7 +571,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             INNER JOIN WORKOUT w ON ws.workout_id = w.workout_id
             WHERE w.user_id = ?
             ORDER BY ws.workout_date DESC, ws.start_time DESC
-        """, arrayOf(userId.toString()))
+        """, arrayOf(userId))
 
         if (cursor.moveToFirst()) {
             do {

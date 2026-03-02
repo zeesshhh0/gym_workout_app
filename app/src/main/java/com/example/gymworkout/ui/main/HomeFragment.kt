@@ -1,6 +1,5 @@
 package com.example.gymworkout.ui.main
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,6 +12,7 @@ import com.example.gymworkout.R
 import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.ui.workout.SessionDetailActivity
 import com.example.gymworkout.ui.workout.WorkoutActivity
+import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -39,10 +39,9 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateUI(view: View) {
-        val sharedPref = requireActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        val userId = sharedPref.getInt("user_id", -1)
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
 
-        if (userId == -1) return
+        if (userId == null) return
 
         // Greeting
         val greetingTextView = view.findViewById<TextView>(R.id.text_view_greeting)

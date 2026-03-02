@@ -1,6 +1,5 @@
 package com.example.gymworkout.ui.login
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
@@ -9,18 +8,22 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.databinding.ActivityLoginBinding
 import com.example.gymworkout.ui.main.HomeActivity
+import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private lateinit var dbHelper: DatabaseHelper
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Check if user is already logged in
-        val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        if (sharedPreferences.contains("user_id")) {
+        // Initialize Firebase Auth
+        auth = FirebaseAuth.getInstance()
+
+        // Check if user is already logged in via Firebase
+        if (auth.currentUser != null) {
             val intent = Intent(this, HomeActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
@@ -51,24 +54,23 @@ class LoginActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
-                val userId = dbHelper.checkUser(email, password)
-                if (userId != -1) {
-                    // Save user session
-                    val editor = sharedPreferences.edit()
-                    editor.putInt("user_id", userId)
-                    editor.putBoolean("is_logged_in", true)
-                    editor.apply()
+                // Firebase Auth sign-in
+                auth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this@LoginActivity) { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(this@LoginActivity, "Login successful!", Toast.LENGTH_SHORT).show()
 
-                    Toast.makeText(this@LoginActivity, "Login successful!", Toast.LENGTH_SHORT).show()
-
-                    // Navigate to HomeActivity
-                    val intent = Intent(this@LoginActivity, HomeActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                    finish()
-                } else {
-                    passwordLayout.error = "Invalid email or password"
-                }
+                            // Navigate to HomeActivity
+                            val intent = Intent(this@LoginActivity, HomeActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            startActivity(intent)
+                            finish()
+                        } else {
+                            val errorMessage = task.exception?.message ?: "Invalid email or password"
+                            Toast.makeText(this@LoginActivity, errorMessage, Toast.LENGTH_LONG).show()
+                            passwordLayout.error = errorMessage
+                        }
+                    }
             }
         }
 

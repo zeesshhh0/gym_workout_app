@@ -13,6 +13,7 @@ import com.example.gymworkout.R
 import com.example.gymworkout.data.db.DatabaseHelper
 import com.example.gymworkout.ui.adapters.WorkoutAdapter
 import com.example.gymworkout.ui.exercise.ExercisesActivity
+import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -38,8 +39,7 @@ class WorkoutActivity : AppCompatActivity() {
 
         workoutId = intent.getLongExtra("workoutId", -1)
         if (workoutId == -1L) {
-            val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
-            val userId = sharedPreferences.getInt("user_id", -1)
+            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
             workoutId = dbHelper.addWorkout(userId, "New Workout", "")
             sessionId = dbHelper.getOrCreateWorkoutSession(workoutId.toInt())
         } else {
