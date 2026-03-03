@@ -10,8 +10,9 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        app:titleTextColor="?attr/colorOnPrimary" />
+        android:background="?attr/colorSurface"
+        app:titleTextAppearance="@style/TextAppearance.GymWorkout.Toolbar.Title"
+        app:titleTextColor="?attr/colorPrimary" />
 
     <FrameLayout
         android:id="@+id/fragment_container"

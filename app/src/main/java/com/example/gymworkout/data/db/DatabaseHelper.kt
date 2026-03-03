@@ -200,24 +200,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return db.insert("USERS", null, contentValues)
     }
 
-    fun checkUser(email: String, password_hash: String): String? {
-        val db = this.readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM USERS WHERE email = ? AND password_hash = ?", arrayOf(email, password_hash))
-        var userId: String? = null
-        if (cursor.moveToFirst()) {
-            userId = cursor.getString(cursor.getColumnIndexOrThrow("user_id"))
-        }
-        cursor.close()
-        return userId
-    }
-
-    fun isUserRegistered(email: String): Boolean {
-        val db = this.readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM USERS WHERE email = ?", arrayOf(email))
-        val count = cursor.count
-        cursor.close()
-        return count > 0
-    }
 
     fun getUserName(userId: String): String? {
         val db = this.readableDatabase
