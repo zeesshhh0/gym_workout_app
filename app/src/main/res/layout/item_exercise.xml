@@ -5,23 +5,15 @@
     style="@style/Widget.Material3.CardView.Elevated"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="16dp"
+    android:layout_marginHorizontal="8dp"
     android:layout_marginVertical="8dp"
-    app:cardCornerRadius="20dp">
+    app:cardCornerRadius="20dp"
+    app:cardBackgroundColor="?attr/colorSurfaceContainer">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="20dp">
-
-        <ImageView
-            android:id="@+id/image_view_exercise"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:contentDescription="@string/content_description_exercise_image"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:src="@drawable/chest" />
+        android:padding="12dp">
 
         <TextView
             android:id="@+id/text_view_exercise_name"
@@ -29,11 +21,22 @@
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceTitleLarge"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/image_view_exercise"
+            app:layout_constraintEnd_toStartOf="@id/button_delete_exercise"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginEnd="16dp"
             tools:text="Bench Press" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_delete_exercise"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:icon="@android:drawable/ic_menu_delete"
+            app:iconTint="?attr/colorOnSurfaceVariant"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/text_view_muscle_group"
@@ -42,7 +45,7 @@
             android:layout_marginTop="4dp"
             android:textAppearance="?attr/textAppearanceBodyMedium"
             android:textColor="?attr/colorOnSurfaceVariant"
-            app:layout_constraintEnd_toStartOf="@id/image_view_exercise"
+            app:layout_constraintEnd_toStartOf="@id/button_delete_exercise"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/text_view_exercise_name"
             android:layout_marginEnd="16dp"
@@ -61,13 +64,16 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_add_set"
             style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             android:text="@string/add_set"
+            android:textColor="@color/peach"
             app:icon="@android:drawable/ic_input_add"
+            app:iconTint="@color/peach"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/recycler_view_sets" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

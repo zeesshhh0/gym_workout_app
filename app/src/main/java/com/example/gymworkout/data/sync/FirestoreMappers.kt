@@ -34,6 +34,7 @@ fun Set.toFirestoreMap(): HashMap<String, Any> {
     map["setNumber"] = setNumber
     map["weightUsed"] = weightUsed
     map["reps"] = reps
+    map["isCompleted"] = isCompleted
     return map
 }
 

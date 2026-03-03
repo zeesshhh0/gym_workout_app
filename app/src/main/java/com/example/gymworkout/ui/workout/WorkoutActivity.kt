@@ -72,7 +72,9 @@ class WorkoutActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         val exercises = repository.getExercisesForWorkout(workoutId.toInt())
-        workoutAdapter = WorkoutAdapter(exercises, true)
+        workoutAdapter = WorkoutAdapter(exercises, true) {
+            refreshExercises()
+        }
         recyclerView.adapter = workoutAdapter
 
         buttonAddExercise.setOnClickListener {
@@ -101,6 +103,10 @@ class WorkoutActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        refreshExercises()
+    }
+
+    private fun refreshExercises() {
         val exercises = repository.getExercisesForWorkout(workoutId.toInt())
         workoutAdapter.exercises = exercises
         workoutAdapter.notifyDataSetChanged()

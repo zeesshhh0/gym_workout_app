@@ -59,4 +59,6 @@
     <color name="md_theme_dark_surfaceContainerLow">#221C1A</color>
     <color name="md_theme_dark_surfaceContainerHigh">#2C2522</color>
     <color name="md_theme_dark_surfaceContainerHighest">#312A27</color>
+    <color name="peach">#FF8A65</color>
+    <color name="grey_400">#BDBDBD</color>
 </resources>

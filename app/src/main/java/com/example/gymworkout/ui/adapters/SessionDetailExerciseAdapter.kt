@@ -23,6 +23,7 @@ class SessionDetailExerciseAdapter(
         val muscleGroup: TextView = itemView.findViewById(R.id.text_view_muscle_group)
         val setsRecyclerView: RecyclerView = itemView.findViewById(R.id.recycler_view_sets)
         val addSetButton: Button = itemView.findViewById(R.id.button_add_set)
+        val deleteExerciseButton: View = itemView.findViewById(R.id.button_delete_exercise)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExerciseViewHolder {
@@ -37,16 +38,19 @@ class SessionDetailExerciseAdapter(
 
         if (showAddSetButton) {
             holder.addSetButton.visibility = View.VISIBLE
+            holder.deleteExerciseButton.visibility = View.VISIBLE
         } else {
             holder.addSetButton.visibility = View.GONE
+            holder.deleteExerciseButton.visibility = View.GONE
         }
 
         // Fetch sets for this exercise in this session
         val sets = repository.getSetsForExerciseInSession(sessionId, exercise.id)
         val setAdapter = SetAdapter(
             sets,
-            onSetClick = { },
-            onSetDeleteClick = {}
+            onSetUpdate = { _, _, _ -> },
+            onSetDeleteClick = {},
+            onSetCompleteChange = { _, _ -> }
         )
         holder.setsRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context)
         holder.setsRecyclerView.adapter = setAdapter

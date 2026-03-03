@@ -122,7 +122,8 @@ class FirestoreSyncManager {
                                                     exerciseId = (it["exerciseId"] as? Long)?.toInt() ?: exercise.id,
                                                     setNumber = (it["setNumber"] as? Long)?.toInt() ?: 0,
                                                     weightUsed = (it["weightUsed"] as? Double)?.toFloat() ?: 0f,
-                                                    reps = (it["reps"] as? Long)?.toInt() ?: 0
+                                                    reps = (it["reps"] as? Long)?.toInt() ?: 0,
+                                                    isCompleted = (it["isCompleted"] as? Boolean) ?: false
                                                 )
                                             }
                                             exercises.add(ExerciseData(exercise, sets))
@@ -164,6 +165,17 @@ class FirestoreSyncManager {
             }
         }.addOnFailureListener { e ->
             Log.e("FirestoreSyncManager", "Failed to fetch exercises for deletion: ${sessionDoc.path}", e)
+            onSyncFailure?.invoke("Delete sync failed. Your data is saved locally.")
+        }
+    }
+
+    fun deleteExercise(workoutId: String, sessionId: String, exerciseId: String) {
+        val doc = userDoc?.collection("workouts")?.document(workoutId)
+            ?.collection("sessions")?.document(sessionId)
+            ?.collection("exercises")?.document(exerciseId) ?: return
+
+        doc.delete().addOnFailureListener { e ->
+            Log.e("FirestoreSyncManager", "Delete failed for exercise: ${doc.path}", e)
             onSyncFailure?.invoke("Delete sync failed. Your data is saved locally.")
         }
     }

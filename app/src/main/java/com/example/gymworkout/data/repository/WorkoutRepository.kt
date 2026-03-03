@@ -96,10 +96,13 @@ class WorkoutRepository(context: Context) {
         dbHelper.addExercise(muscleGroupId, name, description, instructions)
     fun addExerciseToWorkout(workoutId: Int, exerciseId: Int): Long = 
         dbHelper.addExerciseToWorkout(currentUserId, workoutId, exerciseId)
-    fun getExercisesForWorkout(workoutId: Int): List<Exercise> = 
+    fun getExercisesForWorkout(workoutId: Int): List<Exercise> =
         dbHelper.getExercisesForWorkout(currentUserId, workoutId)
-    fun getExercisesForSession(sessionId: Int): List<Exercise> = 
-        dbHelper.getExercisesForSession(currentUserId, sessionId)
+    fun deleteExerciseFromWorkout(workoutId: Int, sessionId: Int, exerciseId: Int) {
+        dbHelper.deleteExerciseFromWorkout(currentUserId, workoutId, exerciseId)
+        firestoreSyncManager.deleteExercise(workoutId.toString(), sessionId.toString(), exerciseId.toString())
+    }
+    fun getExercisesForSession(sessionId: Int): List<Exercise> =        dbHelper.getExercisesForSession(currentUserId, sessionId)
 
     // Set methods
     fun addSet(workoutId: Int, exerciseId: Int, sets: Int, reps: Int, weight: Float) = 
@@ -108,11 +111,12 @@ class WorkoutRepository(context: Context) {
         dbHelper.getSetsForExercise(currentUserId, sessionId, exerciseId)
     fun getSetsForExerciseInSession(sessionId: Int, exerciseId: Int): List<ExcerciseSet> =
         dbHelper.getSetsForExerciseInSession(currentUserId, sessionId, exerciseId)
-    fun updateSet(setId: Int, reps: Int, weight: Float) = 
+    fun updateSet(setId: Int, reps: Int, weight: Float) =
         dbHelper.updateSet(currentUserId, setId, reps, weight)
-    fun deleteSet(setId: Int) = 
+    fun updateSetCompletionStatus(setId: Int, isCompleted: Boolean) =
+        dbHelper.updateSetCompletionStatus(currentUserId, setId, isCompleted)
+    fun deleteSet(setId: Int) =
         dbHelper.deleteSet(currentUserId, setId)
-
     fun clearAllData() = dbHelper.clearAllData(currentUserId)
 
     fun hasLocalData(): Boolean {

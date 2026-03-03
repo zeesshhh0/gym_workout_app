@@ -3,7 +3,6 @@ package com.example.gymworkout.ui.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymworkout.R
@@ -30,11 +29,11 @@ class ExerciseRecyclerAdapter(
         } else {
             holder.addSetButton.visibility = View.GONE
         }
-        if (showExerciseImage) {
-            holder.exerciseImageView.visibility = View.VISIBLE
-        } else {
-            holder.exerciseImageView.visibility = View.GONE
-        }
+//        if (showExerciseImage) {
+//            holder.exerciseImageView.visibility = View.VISIBLE
+//        } else {
+//            holder.exerciseImageView.visibility = View.GONE
+//        }
     }
 
     override fun getItemCount(): Int = exercises.size
@@ -45,7 +44,7 @@ class ExerciseRecyclerAdapter(
     }
 
     inner class ExerciseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val exerciseImageView: ImageView = itemView.findViewById(R.id.image_view_exercise)
+        //val exerciseImageView: ImageView = itemView.findViewById(R.id.image_view_exercise)
         private val exerciseNameTextView: TextView = itemView.findViewById(R.id.text_view_exercise_name)
         private val muscleGroupTextView: TextView = itemView.findViewById(R.id.text_view_muscle_group)
         val addSetButton: android.widget.Button = itemView.findViewById(R.id.button_add_set)
@@ -61,7 +60,7 @@ class ExerciseRecyclerAdapter(
                 "abs" -> R.drawable.abs
                 else -> R.drawable.bicpes
             }
-            exerciseImageView.setImageResource(drawableId)
+            //exerciseImageView.setImageResource(drawableId)
 
             itemView.setOnClickListener { onItemClick(exercise) }
         }

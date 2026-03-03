@@ -2,50 +2,80 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_set_row"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingVertical="4dp">
+    android:paddingVertical="4dp"
+    android:descendantFocusability="beforeDescendants">
 
     <TextView
         android:id="@+id/text_view_set_number"
-        android:layout_width="wrap_content"
+        android:layout_width="24dp"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:textAppearance="?attr/textAppearanceBodyMedium"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Set 1" />
+        tools:text="1" />
 
-    <TextView
-        android:id="@+id/text_view_reps"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
+    <EditText
+        android:id="@+id/edit_text_weight"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="12dp"
+        android:background="@drawable/bg_pill_input"
+        android:gravity="center"
+        android:inputType="numberDecimal"
+        android:imeOptions="actionNext"
         android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:hint="@string/kg"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/edit_text_reps"
+        app:layout_constraintHorizontal_weight="1"
         app:layout_constraintStart_toEndOf="@id/text_view_set_number"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="10 reps" />
+        tools:text="100.0" />
 
-    <TextView
-        android:id="@+id/text_view_weight"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
+    <EditText
+        android:id="@+id/edit_text_reps"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/bg_pill_input"
+        android:gravity="center"
+        android:inputType="number"
+        android:imeOptions="actionDone"
         android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:hint="@string/reps"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_view_reps"
+        app:layout_constraintEnd_toStartOf="@+id/button_delete_set"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@id/edit_text_weight"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="100 kg" />
+        tools:text="10" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/button_delete_set"
         style="@style/Widget.Material3.Button.IconButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
         app:icon="@android:drawable/ic_menu_delete"
         app:iconTint="?attr/colorError"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/checkbox_complete"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/checkbox_complete"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:button="@null"
+        app:buttonIcon="@drawable/ic_check_circle"
+        app:buttonIconTint="@color/checkbox_tint_selector"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

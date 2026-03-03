@@ -6,5 +6,6 @@ data class Set(
     val exerciseId: Int,
     val setNumber: Int,
     val weightUsed: Float,
-    val reps: Int
+    val reps: Int,
+    val isCompleted: Boolean = false
 )

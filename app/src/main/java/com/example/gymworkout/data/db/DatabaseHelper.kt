@@ -9,8 +9,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     companion object {
         private const val DATABASE_NAME = "gymworkout1.db"
-        private const val DATABASE_VERSION = 4
+        private const val DATABASE_VERSION = 5
     }
+
 
     override fun onCreate(db: SQLiteDatabase) {
         // Create tables here
@@ -86,6 +87,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 set_number INTEGER NOT NULL,
                 reps INTEGER NOT NULL,
                 weight_used REAL,
+                is_completed INTEGER DEFAULT 0,
                 user_id TEXT,
                 FOREIGN KEY (session_id) REFERENCES WORKOUT_SESSIONS(session_id),
                 FOREIGN KEY (exercise_id) REFERENCES EXERCISES(exercise_id)
@@ -549,7 +551,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 val setNumber = cursor.getInt(cursor.getColumnIndexOrThrow("set_number"))
                 val reps = cursor.getInt(cursor.getColumnIndexOrThrow("reps"))
                 val weightUsed = cursor.getFloat(cursor.getColumnIndexOrThrow("weight_used"))
-                sets.add(com.example.gymworkout.data.model.Set(id, sId, eId, setNumber, weightUsed, reps))
+                val isCompleted = cursor.getInt(cursor.getColumnIndexOrThrow("is_completed")) == 1
+                sets.add(com.example.gymworkout.data.model.Set(id, sId, eId, setNumber, weightUsed, reps, isCompleted))
             } while (cursor.moveToNext())
         }
         cursor.close()
@@ -619,7 +622,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 val setNumber = cursor.getInt(cursor.getColumnIndexOrThrow("set_number"))
                 val reps = cursor.getInt(cursor.getColumnIndexOrThrow("reps"))
                 val weightUsed = cursor.getFloat(cursor.getColumnIndexOrThrow("weight_used"))
-                sets.add(com.example.gymworkout.data.model.Set(id, sId, eId, setNumber, weightUsed, reps))
+                val isCompleted = cursor.getInt(cursor.getColumnIndexOrThrow("is_completed")) == 1
+                sets.add(com.example.gymworkout.data.model.Set(id, sId, eId, setNumber, weightUsed, reps, isCompleted))
             } while (cursor.moveToNext())
         }
         cursor.close()
@@ -662,6 +666,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun deleteSet(userId: String, setId: Int) {
         val db = this.writableDatabase
         db.delete("SETS", "set_id = ? AND user_id = ?", arrayOf(setId.toString(), userId))
+    }
+
+    fun deleteExerciseFromWorkout(userId: String, workoutId: Int, exerciseId: Int) {
+        val db = this.writableDatabase
+        db.delete("WORKOUT_EXERCISE", "workout_id = ? AND exercise_id = ? AND user_id = ?", arrayOf(workoutId.toString(), exerciseId.toString(), userId))
     }
 
     fun clearAllData(userId: String) {
@@ -723,6 +732,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                             setValues.put("set_number", set.setNumber)
                             setValues.put("reps", set.reps)
                             setValues.put("weight_used", set.weightUsed)
+                            setValues.put("is_completed", if (set.isCompleted) 1 else 0)
                             setValues.put("user_id", userId)
                             db.insertWithOnConflict("SETS", null, setValues, SQLiteDatabase.CONFLICT_REPLACE)
                         }
@@ -733,5 +743,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         } finally {
             db.endTransaction()
         }
+    }
+
+    fun updateSetCompletionStatus(userId: String, setId: Int, isCompleted: Boolean) {
+        val db = this.writableDatabase
+        val contentValues = ContentValues()
+        contentValues.put("is_completed", if (isCompleted) 1 else 0)
+        db.update("SETS", contentValues, "set_id = ? AND user_id = ?", arrayOf(setId.toString(), userId))
     }
 }
