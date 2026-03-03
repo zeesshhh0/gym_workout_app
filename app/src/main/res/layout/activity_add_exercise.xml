@@ -40,7 +40,7 @@
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Exercise Name">
+                android:hint="@string/exercise_name">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/exerciseNameEditText"
@@ -56,7 +56,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="Description">
+                android:hint="@string/description">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/exerciseDescriptionEditText"
@@ -71,12 +71,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="Muscle Group">
+                android:hint="@string/muscle_group">
 
                 <AutoCompleteTextView
                     android:id="@+id/muscleGroupAutoCompleteTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:hint="@string/muscle_group"
                     android:inputType="none" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -87,7 +88,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="Instructions">
+                android:hint="@string/instructions">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/exerciseInstructionsEditText"
@@ -106,7 +107,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
                 android:paddingVertical="16dp"
-                android:text="Save Exercise" />
+                android:text="@string/save_exercise" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

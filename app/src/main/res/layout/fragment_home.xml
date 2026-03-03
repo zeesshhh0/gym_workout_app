@@ -76,27 +76,17 @@
                         android:textStyle="bold"
                         tools:text="1" />
 
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/text_view_streak_unit"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:drawablePadding="4dp"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/text_view_streak_unit"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Day"
-                            android:textAppearance="?attr/textAppearanceTitleMedium"
-                            android:textColor="?attr/colorOnSurfaceVariant" />
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginStart="4dp"
-                            android:src="@drawable/ic_flame"
-                            app:tint="?attr/colorPrimary" />
-                    </LinearLayout>
+                        android:text="@string/day"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        app:drawableEndCompat="@drawable/ic_flame"
+                        app:drawableTint="?attr/colorPrimary" />
                 </LinearLayout>
 
                 <TextView
@@ -104,7 +94,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="3 days to go until your weekly goal."
+                    android:text="@string/weekly_goal_status"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:textColor="?attr/colorOnSurfaceVariant"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -121,7 +111,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:paddingHorizontal="32dp"
-            android:text="Start Workout"
+            android:text="@string/start_workout"
+            android:contentDescription="@string/start_workout"
             android:textColor="?attr/colorOnPrimary"
             app:backgroundTint="?attr/colorPrimary"
             app:elevation="6dp"
@@ -136,7 +127,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:text="Last Workout"
+            android:text="@string/last_workout"
             android:textAppearance="?attr/textAppearanceTitleLarge"
             android:textColor="?attr/colorOnSurface"
             android:textStyle="bold"
@@ -194,69 +185,45 @@
                     app:layout_constraintTop_toBottomOf="@id/text_view_last_workout_date">
 
                     <!-- Duration Chip -->
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/text_view_duration"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="16dp"
+                        android:drawablePadding="4dp"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal">
-                        <ImageView
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
-                            android:src="@drawable/ic_timer"
-                            app:tint="?attr/colorOnSurfaceVariant" />
-                        <TextView
-                            android:id="@+id/text_view_duration"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:textAppearance="?attr/textAppearanceBodySmall"
-                            android:textColor="?attr/colorOnSurfaceVariant"
-                            tools:text="45m" />
-                    </LinearLayout>
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        app:drawableStartCompat="@drawable/ic_timer"
+                        app:drawableTint="?attr/colorOnSurfaceVariant"
+                        tools:text="45m" />
 
                     <!-- Exercise Count Chip -->
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/text_view_exercise_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="16dp"
+                        android:drawablePadding="4dp"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal">
-                        <ImageView
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
-                            android:src="@drawable/ic_fitness"
-                            app:tint="?attr/colorOnSurfaceVariant" />
-                        <TextView
-                            android:id="@+id/text_view_exercise_count"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:textAppearance="?attr/textAppearanceBodySmall"
-                            android:textColor="?attr/colorOnSurfaceVariant"
-                            tools:text="6" />
-                    </LinearLayout>
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        app:drawableStartCompat="@drawable/ic_fitness"
+                        app:drawableTint="?attr/colorOnSurfaceVariant"
+                        tools:text="6" />
 
                     <!-- Volume Chip -->
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/text_view_volume"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:drawablePadding="4dp"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal">
-                        <ImageView
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
-                            android:src="@drawable/ic_weight"
-                            app:tint="?attr/colorOnSurfaceVariant" />
-                        <TextView
-                            android:id="@+id/text_view_volume"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:textAppearance="?attr/textAppearanceBodySmall"
-                            android:textColor="?attr/colorOnSurfaceVariant"
-                            tools:text="5,400 kg" />
-                    </LinearLayout>
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        app:drawableStartCompat="@drawable/ic_weight"
+                        app:drawableTint="?attr/colorOnSurfaceVariant"
+                        tools:text="5,400 kg" />
                 </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
@@ -265,7 +232,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="View Details"
+                    android:text="@string/view_details"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/layout_stats_chips" />

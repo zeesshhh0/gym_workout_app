@@ -18,6 +18,7 @@
             android:id="@+id/image_view_exercise"
             android:layout_width="64dp"
             android:layout_height="64dp"
+            android:contentDescription="@string/content_description_exercise_image"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@drawable/chest" />
@@ -63,7 +64,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Add Set"
+            android:text="@string/add_set"
             app:icon="@android:drawable/ic_input_add"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
