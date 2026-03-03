@@ -133,4 +133,6 @@
     <string name="content_description_timer_icon">Timer Icon</string>
     <string name="content_description_weight_icon">Weight Icon</string>
     <string name="content_description_flame_icon">Flame Icon</string>
+    <string name="kg">kg</string>
+    <string name="reps">reps</string>
 </resources>
