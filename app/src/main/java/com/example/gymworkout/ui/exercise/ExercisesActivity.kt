@@ -3,6 +3,7 @@ package com.example.gymworkout.ui.exercise
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -41,8 +42,15 @@ class ExercisesActivity : AppCompatActivity() {
             exercises = exercises,
             onItemClick = { exercise ->
                 if (workoutId != -1L) {
-                    repository.addExerciseToWorkout(workoutId.toInt(), exercise.id)
-                    finish()
+                    val currentExercises = repository.getExercisesForWorkout(workoutId.toInt())
+                    val alreadyExists = currentExercises.any { it.id == exercise.id }
+                    
+                    if (alreadyExists) {
+                        Toast.makeText(this, "${exercise.name} is already in this workout", Toast.LENGTH_SHORT).show()
+                    } else {
+                        repository.addExerciseToWorkout(workoutId.toInt(), exercise.id)
+                        finish()
+                    }
                 }
             }, showAddSetButton = false
         )

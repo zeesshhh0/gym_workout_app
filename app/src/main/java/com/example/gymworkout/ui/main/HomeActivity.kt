@@ -47,6 +47,9 @@ class HomeActivity : AppCompatActivity() {
             redirectToLogin()
             return // Important to prevent the rest of onCreate from running
         }
+        
+        // Clean up any incomplete sessions from previous app runs
+        repository.cleanUpOrphanedData()
 
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)

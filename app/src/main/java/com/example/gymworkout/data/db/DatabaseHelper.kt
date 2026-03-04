@@ -687,6 +687,28 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         }
     }
 
+    fun cleanUpOrphanedData(userId: String) {
+        val db = this.writableDatabase
+        db.beginTransaction()
+        try {
+            // Delete sets linked to incomplete sessions
+            db.execSQL("DELETE FROM SETS WHERE session_id IN (SELECT session_id FROM WORKOUT_SESSIONS WHERE end_time IS NULL AND user_id = ?)", arrayOf(userId))
+            
+            // Delete incomplete sessions
+            db.delete("WORKOUT_SESSIONS", "end_time IS NULL AND user_id = ?", arrayOf(userId))
+            
+            // Delete workout_exercises for workouts that have no sessions left
+            db.execSQL("DELETE FROM WORKOUT_EXERCISE WHERE workout_id NOT IN (SELECT DISTINCT workout_id FROM WORKOUT_SESSIONS WHERE user_id = ?) AND user_id = ?", arrayOf(userId, userId))
+            
+            // Delete workouts that have no sessions left
+            db.execSQL("DELETE FROM WORKOUT WHERE workout_id NOT IN (SELECT DISTINCT workout_id FROM WORKOUT_SESSIONS WHERE user_id = ?) AND user_id = ?", arrayOf(userId, userId))
+            
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
     fun restoreData(userId: String, workoutData: List<com.example.gymworkout.data.sync.FirestoreSyncManager.WorkoutData>) {
         val db = this.writableDatabase
         db.beginTransaction()

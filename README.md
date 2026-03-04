@@ -50,8 +50,8 @@ To get a local copy up and running, follow these simple steps.
 - [x] fix the next pages top nav colors
 - [x] on workout session rename the title to live workout or something
 - [x] every dialog box that opens should be material themed
-- [ ] add change password implementation 
-- [ ] there is some glitch in the add new set function
+- [x] there is some glitch in the add new set function
 - [ ] change the ui of workout exercises screen
 - [ ] change the ui of workout session history 
 - [ ] reconsider data structure of the app
+- [ ] add change password implementation 

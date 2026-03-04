@@ -118,6 +118,7 @@ class WorkoutRepository(context: Context) {
     fun deleteSet(setId: Int) =
         dbHelper.deleteSet(currentUserId, setId)
     fun clearAllData() = dbHelper.clearAllData(currentUserId)
+    fun cleanUpOrphanedData() = dbHelper.cleanUpOrphanedData(currentUserId)
 
     fun hasLocalData(): Boolean {
         return dbHelper.getAllWorkoutSessions(currentUserId).isNotEmpty() || 

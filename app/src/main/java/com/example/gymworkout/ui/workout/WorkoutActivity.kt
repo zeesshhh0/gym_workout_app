@@ -84,15 +84,7 @@ class WorkoutActivity : AppCompatActivity() {
         }
 
         buttonFinishWorkout.setOnClickListener {
-            val exercises = repository.getExercisesForWorkout(workoutId.toInt())
-            if (exercises.isEmpty()) {
-                repository.deleteWorkoutAndSession(workoutId, sessionId)
-            } else {
-                val timeFormat = SimpleDateFormat("HH:mm:ss")
-                repository.updateWorkoutSessionEndTime(sessionId, timeFormat.format(Date()))
-            }
-            setResult(RESULT_OK)
-            finish()
+            finishWorkout()
         }
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -132,12 +124,37 @@ class WorkoutActivity : AppCompatActivity() {
         val exercises = repository.getExercisesForWorkout(workoutId.toInt())
         if (exercises.isEmpty()) {
             repository.deleteWorkoutAndSession(workoutId, sessionId)
-        } else {
-            val timeFormat = SimpleDateFormat("HH:mm:ss")
-            repository.updateWorkoutSessionEndTime(sessionId, timeFormat.format(Date()))
+            setResult(RESULT_OK)
+            finish()
+            return
         }
+
+        for (exercise in exercises) {
+            val sets = repository.getSetsForExercise(sessionId, exercise.id)
+            if (sets.isEmpty()) {
+                showInvalidExerciseDialog(exercise.name)
+                return
+            }
+            for (set in sets) {
+                if (set.weightUsed == 0f && set.reps == 0) {
+                    showInvalidExerciseDialog(exercise.name)
+                    return
+                }
+            }
+        }
+
+        val timeFormat = SimpleDateFormat("HH:mm:ss")
+        repository.updateWorkoutSessionEndTime(sessionId, timeFormat.format(Date()))
         setResult(RESULT_OK)
         finish()
+    }
+
+    private fun showInvalidExerciseDialog(exerciseName: String) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Incomplete Exercise")
+            .setMessage("The exercise '$exerciseName' has no sets or contains empty sets (both weight and reps cannot be zero). Please add valid sets or delete the exercise.")
+            .setPositiveButton("OK", null)
+            .show()
     }
 
     private fun deleteWorkout() {

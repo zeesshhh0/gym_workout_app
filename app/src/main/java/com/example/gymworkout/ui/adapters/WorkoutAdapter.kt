@@ -41,35 +41,52 @@ class WorkoutAdapter(
             repository = WorkoutRepository(holder.itemView.context)
         }
         val sessionId = repository.getOrCreateWorkoutSession(exercise.workoutId)
-        var sets = repository.getSetsForExercise(sessionId, exercise.id)
+        val sets = repository.getSetsForExercise(sessionId, exercise.id)
         
-        val setAdapter = SetAdapter(sets, { set, newReps, newWeight ->
-            repository.updateSet(set.id, newReps, newWeight)
-        }, { set ->
-            showDeleteSetDialog(holder.itemView.context, set) {
+        if (holder.setsRecyclerView.adapter == null) {
+            val setAdapter = SetAdapter(sets, { set, newReps, newWeight ->
+                repository.updateSet(set.id, newReps, newWeight)
+            }, { set ->
+                showDeleteSetDialog(holder.itemView.context, set) {
+                    val updatedSets = repository.getSetsForExercise(sessionId, exercise.id)
+                    (holder.setsRecyclerView.adapter as SetAdapter).updateData(updatedSets)
+                }
+            }, { set, isCompleted ->
+                repository.updateSetCompletionStatus(set.id, isCompleted)
                 val updatedSets = repository.getSetsForExercise(sessionId, exercise.id)
                 (holder.setsRecyclerView.adapter as SetAdapter).updateData(updatedSets)
-            }
-        }, { set, isCompleted ->
-            repository.updateSetCompletionStatus(set.id, isCompleted)
-            val updatedSets = repository.getSetsForExercise(sessionId, exercise.id)
-            (holder.setsRecyclerView.adapter as SetAdapter).updateData(updatedSets)
-        })
-        
-        holder.setsRecyclerView.adapter = setAdapter
-        holder.setsRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context)
-
-        holder.addSetButton.setOnClickListener {
-            val nextSetNumber = sets.size + 1
-            repository.addSet(exercise.workoutId, exercise.id, nextSetNumber, 0, 0f)
-            sets = repository.getSetsForExercise(sessionId, exercise.id)
+            })
+            holder.setsRecyclerView.adapter = setAdapter
+            holder.setsRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context)
+        } else {
             (holder.setsRecyclerView.adapter as SetAdapter).updateData(sets)
         }
 
-        holder.deleteExerciseButton.setOnClickListener {
-            repository.deleteExerciseFromWorkout(exercise.workoutId, sessionId, exercise.id)
-            onExerciseDeleted()
+        holder.addSetButton.setOnClickListener {
+            val currentSets = (holder.setsRecyclerView.adapter as SetAdapter).sets
+            val nextSetNumber = currentSets.size + 1
+            repository.addSet(exercise.workoutId, exercise.id, nextSetNumber, 0, 0f)
+            val updatedSets = repository.getSetsForExercise(sessionId, exercise.id)
+            (holder.setsRecyclerView.adapter as SetAdapter).updateData(updatedSets)
         }
+
+        holder.deleteExerciseButton.setOnClickListener {
+            showDeleteExerciseDialog(holder.itemView.context, exercise.name) {
+                repository.deleteExerciseFromWorkout(exercise.workoutId, sessionId, exercise.id)
+                onExerciseDeleted()
+            }
+        }
+    }
+
+    private fun showDeleteExerciseDialog(context: android.content.Context, exerciseName: String, onExerciseDeleted: () -> Unit) {
+        MaterialAlertDialogBuilder(context)
+            .setTitle("Delete Exercise")
+            .setMessage("Are you sure you want to delete '$exerciseName' and all its sets from this workout?")
+            .setPositiveButton("Delete") { _, _ ->
+                onExerciseDeleted()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun showDeleteSetDialog(context: android.content.Context, set: com.example.gymworkout.data.model.Set, onSetDeleted: () -> Unit) {
