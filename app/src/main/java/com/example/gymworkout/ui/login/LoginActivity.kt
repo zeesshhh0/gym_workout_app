@@ -1,6 +1,5 @@
 package com.example.gymworkout.ui.login
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
@@ -10,6 +9,7 @@ import com.example.gymworkout.data.repository.WorkoutRepository
 import com.example.gymworkout.data.sync.FirestoreSyncManager
 import com.example.gymworkout.databinding.ActivityLoginBinding
 import com.example.gymworkout.ui.main.HomeActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : AppCompatActivity() {
@@ -75,7 +75,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun handleLoginRestore() {
-        val progressDialog = AlertDialog.Builder(this)
+        val progressDialog = MaterialAlertDialogBuilder(this)
             .setTitle("Syncing Data")
             .setMessage("Checking for cloud data...")
             .setCancelable(false)
@@ -108,7 +108,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun showRestorePrompt(allData: List<FirestoreSyncManager.WorkoutData>) {
-        AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(this)
             .setTitle("Cloud Data Found")
             .setMessage("You have workout data in the cloud. Would you like to restore it and overwrite local data, or keep your current local data?")
             .setPositiveButton("Restore from Cloud") { _, _ ->

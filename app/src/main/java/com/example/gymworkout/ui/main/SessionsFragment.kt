@@ -19,6 +19,7 @@ import com.example.gymworkout.ui.workout.SessionDetailActivity
 class SessionsFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
+    private lateinit var noSessionsTextView: android.widget.TextView
     private lateinit var sessionAdapter: SessionAdapter
     private lateinit var repository: WorkoutRepository
     private var sessions: List<WorkoutSession> = emptyList()
@@ -37,8 +38,8 @@ class SessionsFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_sessions, container, false)
 
         repository = WorkoutRepository(requireContext())
-        refreshSessions()
-
+        noSessionsTextView = view.findViewById(R.id.noSessionsTextView)
+        
         recyclerView = view.findViewById(R.id.sessionsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         sessionAdapter = SessionAdapter(sessions) { session ->
@@ -48,11 +49,16 @@ class SessionsFragment : Fragment() {
         }
         recyclerView.adapter = sessionAdapter
 
+        refreshSessions()
+
         return view
     }
 
     private fun refreshSessions() {
         sessions = repository.getAllWorkoutSessions()
+        if (::noSessionsTextView.isInitialized) {
+            noSessionsTextView.visibility = if (sessions.isEmpty()) View.VISIBLE else View.GONE
+        }
         if (::sessionAdapter.isInitialized) {
             sessionAdapter.updateData(sessions)
         }

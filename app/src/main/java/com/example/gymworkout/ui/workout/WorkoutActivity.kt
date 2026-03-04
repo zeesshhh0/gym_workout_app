@@ -1,6 +1,5 @@
 package com.example.gymworkout.ui.workout
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -14,6 +13,7 @@ import com.example.gymworkout.data.repository.WorkoutRepository
 import com.example.gymworkout.ui.adapters.WorkoutAdapter
 import com.example.gymworkout.ui.exercise.ExercisesActivity
 import com.example.gymworkout.ui.login.LoginActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -33,8 +33,8 @@ class WorkoutActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_workout)
 
-        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
+//        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
+//        setSupportActionBar(toolbar)
 
         repository = WorkoutRepository(this)
         repository.setSyncListeners(
@@ -113,23 +113,19 @@ class WorkoutActivity : AppCompatActivity() {
     }
 
     private fun showExitConfirmationDialog() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Finish or Delete Workout?")
-        builder.setMessage("Do you want to finish or delete this workout?")
-
-        builder.setPositiveButton("Finish") { _, _ ->
-            finishWorkout()
-        }
-
-        builder.setNegativeButton("Delete") { _, _ ->
-            deleteWorkout()
-        }
-
-        builder.setNeutralButton("Cancel") { dialog, _ ->
-            dialog.dismiss()
-        }
-
-        builder.create().show()
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Finish or Delete Workout?")
+            .setMessage("Do you want to finish or delete this workout?")
+            .setPositiveButton("Finish") { _, _ ->
+                finishWorkout()
+            }
+            .setNegativeButton("Delete") { _, _ ->
+                deleteWorkout()
+            }
+            .setNeutralButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun finishWorkout() {

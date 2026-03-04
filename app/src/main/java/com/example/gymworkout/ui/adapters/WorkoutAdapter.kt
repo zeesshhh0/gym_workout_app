@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.gymworkout.R
 import com.example.gymworkout.data.model.Exercise
 import com.example.gymworkout.data.repository.WorkoutRepository
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class WorkoutAdapter(
     var exercises: List<Exercise>, 
@@ -72,15 +73,15 @@ class WorkoutAdapter(
     }
 
     private fun showDeleteSetDialog(context: android.content.Context, set: com.example.gymworkout.data.model.Set, onSetDeleted: () -> Unit) {
-        val builder = android.app.AlertDialog.Builder(context)
-        builder.setTitle("Delete Set")
-        builder.setMessage("Are you sure you want to delete this set?")
-        builder.setPositiveButton("Delete") { _, _ ->
-            repository.deleteSet(set.id)
-            onSetDeleted()
-        }
-        builder.setNegativeButton("Cancel", null)
-        builder.create().show()
+        MaterialAlertDialogBuilder(context)
+            .setTitle("Delete Set")
+            .setMessage("Are you sure you want to delete this set?")
+            .setPositiveButton("Delete") { _, _ ->
+                repository.deleteSet(set.id)
+                onSetDeleted()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     override fun getItemCount(): Int {

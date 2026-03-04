@@ -28,5 +28,6 @@
         <item name="colorSurfaceContainerLow">@color/md_theme_dark_surfaceContainerLow</item>
         <item name="colorSurfaceContainerHigh">@color/md_theme_dark_surfaceContainerHigh</item>
         <item name="colorSurfaceContainerHighest">@color/md_theme_dark_surfaceContainerHighest</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Material3.MaterialAlertDialog</item>
     </style>
 </resources>

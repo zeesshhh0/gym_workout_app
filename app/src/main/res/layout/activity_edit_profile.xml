@@ -20,7 +20,8 @@
             android:background="?attr/colorSurface"
             app:title="Edit Profile"
             app:titleCentered="true"
-            app:titleTextColor="?attr/colorOnSurface" />
+            app:titleTextColor="?attr/colorPrimary"
+            app:navigationIconTint="?attr/colorPrimary" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

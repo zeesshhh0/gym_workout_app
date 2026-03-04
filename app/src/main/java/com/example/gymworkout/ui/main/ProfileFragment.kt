@@ -1,7 +1,6 @@
 package com.example.gymworkout.ui.main
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -18,6 +17,7 @@ import com.example.gymworkout.data.repository.WorkoutRepository
 import com.example.gymworkout.data.sync.FirestoreSyncManager
 import com.example.gymworkout.ui.login.LoginActivity
 import com.example.gymworkout.ui.profile.EditProfileActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 
 class ProfileFragment : Fragment() {
@@ -92,7 +92,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun showRestoreConfirmationDialog() {
-        AlertDialog.Builder(requireContext())
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle("Restore from Cloud")
             .setMessage("Cloud data found. This will overwrite local data. Continue?")
             .setPositiveButton("Continue") { _, _ ->
@@ -103,12 +103,11 @@ class ProfileFragment : Fragment() {
     }
 
     private fun restoreFromCloud() {
-        val progressDialog = AlertDialog.Builder(requireContext())
+        val progressDialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle("Restoring Data")
             .setMessage("Please wait while data is being restored from the cloud...")
             .setCancelable(false)
-            .create()
-        progressDialog.show()
+            .show()
         
         firestoreSyncManager.fetchAllUserData(
             onSuccess = { allData ->

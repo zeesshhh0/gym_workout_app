@@ -63,7 +63,7 @@
         style="@style/Widget.Material3.Button.IconButton"
         android:layout_width="44dp"
         android:layout_height="44dp"
-        app:icon="@android:drawable/ic_menu_delete"
+        app:icon="@drawable/delete"
         app:iconTint="?attr/colorError"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/checkbox_complete"

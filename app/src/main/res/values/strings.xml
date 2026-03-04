@@ -135,4 +135,6 @@
     <string name="content_description_flame_icon">Flame Icon</string>
     <string name="kg">kg</string>
     <string name="reps">reps</string>
+    <string name="no_sessions_message">No workout sessions yet. Start your first workout to see it here!</string>
+    <string name="delete">Delete</string>
 </resources>

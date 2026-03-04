@@ -3,13 +3,13 @@ package com.example.gymworkout.ui.workout
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymworkout.R
 import com.example.gymworkout.data.repository.WorkoutRepository
 import com.example.gymworkout.ui.adapters.SessionDetailExerciseAdapter
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class SessionDetailActivity : AppCompatActivity() {
 
@@ -60,7 +60,7 @@ class SessionDetailActivity : AppCompatActivity() {
     }
 
     private fun showDeleteConfirmationDialog() {
-        AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(this)
             .setTitle("Delete Session")
             .setMessage("Are you sure you want to delete this workout session? This action cannot be undone.")
             .setPositiveButton("Delete") { _, _ ->
