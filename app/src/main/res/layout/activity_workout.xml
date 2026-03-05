@@ -39,7 +39,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="10dp">
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/text_layout_workout_name"
@@ -63,7 +63,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:nestedScrollingEnabled="false"
-                    tools:listitem="@layout/item_exercise" />
+                    tools:listitem="@layout/item_workout_exercise" />
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>

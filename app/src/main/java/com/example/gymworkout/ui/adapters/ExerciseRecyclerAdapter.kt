@@ -29,11 +29,11 @@ class ExerciseRecyclerAdapter(
         } else {
             holder.addSetButton.visibility = View.GONE
         }
-//        if (showExerciseImage) {
-//            holder.exerciseImageView.visibility = View.VISIBLE
-//        } else {
-//            holder.exerciseImageView.visibility = View.GONE
-//        }
+        if (showExerciseImage) {
+            holder.iconContainer.visibility = View.VISIBLE
+        } else {
+            holder.iconContainer.visibility = View.GONE
+        }
     }
 
     override fun getItemCount(): Int = exercises.size
@@ -44,7 +44,8 @@ class ExerciseRecyclerAdapter(
     }
 
     inner class ExerciseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        //val exerciseImageView: ImageView = itemView.findViewById(R.id.image_view_exercise)
+        val iconContainer: android.view.View = itemView.findViewById(R.id.icon_container)
+        private val exerciseImageView: android.widget.ImageView = itemView.findViewById(R.id.image_view_exercise)
         private val exerciseNameTextView: TextView = itemView.findViewById(R.id.text_view_exercise_name)
         private val muscleGroupTextView: TextView = itemView.findViewById(R.id.text_view_muscle_group)
         val addSetButton: android.widget.Button = itemView.findViewById(R.id.button_add_set)
@@ -55,12 +56,21 @@ class ExerciseRecyclerAdapter(
 
             val drawableId = when (exercise.muscleGroup.lowercase()) {
                 "chest" -> R.drawable.chest
-                "biceps" -> R.drawable.bicpes
+                "biceps" -> R.drawable.biceps
                 "quadriceps" -> R.drawable.quadriceps
                 "abs" -> R.drawable.abs
-                else -> R.drawable.bicpes
+                else -> R.drawable.exercise
             }
-            //exerciseImageView.setImageResource(drawableId)
+            exerciseImageView.setImageResource(drawableId)
+            
+            // Remove tint for muscle group images if they are colored pngs
+            if (drawableId != R.drawable.exercise) {
+                exerciseImageView.imageTintList = null
+            } else {
+                // Restore tint for generic icon
+                val colorStateList = itemView.context.getColorStateList(R.color.md_theme_dark_onPrimary)
+                exerciseImageView.imageTintList = colorStateList
+            }
 
             itemView.setOnClickListener { onItemClick(exercise) }
         }
