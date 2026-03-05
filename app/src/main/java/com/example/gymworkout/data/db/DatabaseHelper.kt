@@ -767,6 +767,39 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         }
     }
 
+    fun getHistoryExercisesForSession(userId: String, sessionId: Int): List<com.example.gymworkout.data.model.HistoryExercise> {
+        val exercises = mutableListOf<com.example.gymworkout.data.model.HistoryExercise>()
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("""
+            SELECT e.exercise_name, COUNT(s.set_id) as set_count, MAX(s.weight_used) as max_weight
+            FROM EXERCISES e
+            INNER JOIN SETS s ON e.exercise_id = s.exercise_id
+            WHERE s.session_id = ? AND s.user_id = ?
+            GROUP BY e.exercise_name
+        """, arrayOf(sessionId.toString(), userId))
+
+        if (cursor.moveToFirst()) {
+            do {
+                val name = cursor.getString(cursor.getColumnIndexOrThrow("exercise_name"))
+                val setCount = cursor.getInt(cursor.getColumnIndexOrThrow("set_count"))
+                val maxWeight = cursor.getFloat(cursor.getColumnIndexOrThrow("max_weight"))
+                
+                // Get reps for that max weight (simplification: first set matching max weight)
+                val repsCursor = db.rawQuery("SELECT reps FROM SETS WHERE session_id = ? AND exercise_id = (SELECT exercise_id FROM EXERCISES WHERE exercise_name = ?) AND weight_used = ? LIMIT 1",
+                    arrayOf(sessionId.toString(), name, maxWeight.toString()))
+                var maxReps = 0
+                if (repsCursor.moveToFirst()) {
+                    maxReps = repsCursor.getInt(repsCursor.getColumnIndexOrThrow("reps"))
+                }
+                repsCursor.close()
+
+                exercises.add(com.example.gymworkout.data.model.HistoryExercise(name, setCount, maxWeight, maxReps))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return exercises
+    }
+
     fun updateSetCompletionStatus(userId: String, setId: Int, isCompleted: Boolean) {
         val db = this.writableDatabase
         val contentValues = ContentValues()

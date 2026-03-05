@@ -11,18 +11,18 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymworkout.R
-import com.example.gymworkout.data.model.WorkoutSession
+import com.example.gymworkout.data.model.HistoryItem
 import com.example.gymworkout.data.repository.WorkoutRepository
-import com.example.gymworkout.ui.adapters.SessionAdapter
+import com.example.gymworkout.ui.adapters.HistoryAdapter
 import com.example.gymworkout.ui.workout.SessionDetailActivity
 
 class SessionsFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var noSessionsTextView: android.widget.TextView
-    private lateinit var sessionAdapter: SessionAdapter
+    private lateinit var historyAdapter: HistoryAdapter
     private lateinit var repository: WorkoutRepository
-    private var sessions: List<WorkoutSession> = emptyList()
+    private var historyItems: List<HistoryItem> = emptyList()
 
     private val sessionDetailLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -42,12 +42,12 @@ class SessionsFragment : Fragment() {
         
         recyclerView = view.findViewById(R.id.sessionsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        sessionAdapter = SessionAdapter(sessions) { session ->
+        historyAdapter = HistoryAdapter(historyItems) { sessionId ->
             val intent = Intent(activity, SessionDetailActivity::class.java)
-            intent.putExtra("session_id", session.id)
+            intent.putExtra("session_id", sessionId)
             sessionDetailLauncher.launch(intent)
         }
-        recyclerView.adapter = sessionAdapter
+        recyclerView.adapter = historyAdapter
 
         refreshSessions()
 
@@ -55,12 +55,12 @@ class SessionsFragment : Fragment() {
     }
 
     private fun refreshSessions() {
-        sessions = repository.getAllWorkoutSessions()
+        historyItems = repository.getHistoryData()
         if (::noSessionsTextView.isInitialized) {
-            noSessionsTextView.visibility = if (sessions.isEmpty()) View.VISIBLE else View.GONE
+            noSessionsTextView.visibility = if (historyItems.isEmpty()) View.VISIBLE else View.GONE
         }
-        if (::sessionAdapter.isInitialized) {
-            sessionAdapter.updateData(sessions)
+        if (::historyAdapter.isInitialized) {
+            historyAdapter.updateData(historyItems)
         }
     }
 

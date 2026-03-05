@@ -120,6 +120,40 @@ class WorkoutRepository(context: Context) {
     fun clearAllData() = dbHelper.clearAllData(currentUserId)
     fun cleanUpOrphanedData() = dbHelper.cleanUpOrphanedData(currentUserId)
 
+    fun getHistoryData(): List<com.example.gymworkout.data.model.HistoryItem> {
+        val sessions = dbHelper.getAllWorkoutSessions(currentUserId)
+        val historyItems = mutableListOf<com.example.gymworkout.data.model.HistoryItem>()
+        
+        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd")
+        val monthFormat = java.text.SimpleDateFormat("MMMM yyyy")
+        
+        val groupedByMonth = sessions.groupBy { session ->
+            val date = dateFormat.parse(session.date)
+            monthFormat.format(date ?: java.util.Date())
+        }
+
+        groupedByMonth.forEach { (month, monthSessions) ->
+            historyItems.add(com.example.gymworkout.data.model.HistoryItem.MonthHeader(month, monthSessions.size))
+            monthSessions.forEach { session ->
+                val stats = dbHelper.getSessionStats(currentUserId, session.id)
+                val exercises = dbHelper.getHistoryExercisesForSession(currentUserId, session.id)
+                historyItems.add(
+                    com.example.gymworkout.data.model.HistoryItem.WorkoutCard(
+                        session.id,
+                        session.workoutName,
+                        session.date,
+                        session.startTime,
+                        session.endTime,
+                        stats,
+                        exercises
+                    )
+                )
+            }
+        }
+        
+        return historyItems
+    }
+
     fun hasLocalData(): Boolean {
         return dbHelper.getAllWorkoutSessions(currentUserId).isNotEmpty() || 
                dbHelper.getLatestWorkoutForUser(currentUserId) != null

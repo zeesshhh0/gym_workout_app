@@ -52,7 +52,7 @@ To get a local copy up and running, follow these simple steps.
 - [x] every dialog box that opens should be material themed
 - [x] there is some glitch in the add new set function
 - [x] change the ui of workout exercises screen
-- [ ] change the ui of workout session history (make it month wise category)
+- [x] change the ui of workout session history (make it month wise category)
 - [ ] change the session detail page (should be similar to strong app)
 - [ ] add all the exercises from strong app
 - [ ] reconsider data structure of the app
