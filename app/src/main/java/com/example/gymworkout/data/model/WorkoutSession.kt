@@ -6,6 +6,5 @@ data class WorkoutSession(
     val workoutName: String, // Added for display in sessions list
     val date: String,
     val startTime: String?,
-    val endTime: String?,
-    val notes: String?
+    val endTime: String?
 )

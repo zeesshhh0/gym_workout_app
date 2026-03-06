@@ -53,43 +53,17 @@
 
         <!-- Action Buttons -->
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonEditProfile"
+            android:id="@+id/buttonRestoreCloud"
             style="@style/Widget.Material3.Button.ElevatedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:paddingVertical="14dp"
-            android:text="@string/edit_profile"
-            app:icon="@android:drawable/ic_menu_edit"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/card_profile_details" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonChangePassword"
-            style="@style/Widget.Material3.Button.ElevatedButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:paddingVertical="14dp"
-            android:text="@string/change_password"
-            app:icon="@android:drawable/ic_lock_lock"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/buttonEditProfile" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonRestoreCloud"
-            style="@style/Widget.Material3.Button.ElevatedButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:paddingVertical="14dp"
             android:text="@string/restore_from_cloud"
             app:icon="@android:drawable/ic_menu_upload"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/buttonChangePassword" />
+            app:layout_constraintTop_toBottomOf="@id/card_profile_details" />
 
         <!-- Logout Button -->
         <com.google.android.material.button.MaterialButton

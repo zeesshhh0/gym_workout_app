@@ -10,7 +10,6 @@ import com.example.gymworkout.databinding.ActivityHomeBinding
 import com.example.gymworkout.ui.login.LoginActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 
@@ -45,12 +44,6 @@ class HomeActivity : AppCompatActivity() {
             // Settings can only be set before any other use of the Firestore instance.
         }
 
-        // Check if user is logged in via Firebase
-        if (FirebaseAuth.getInstance().currentUser == null) {
-            redirectToLogin()
-            return // Important to prevent the rest of onCreate from running
-        }
-        
         // Clean up any incomplete sessions from previous app runs
         repository.cleanUpOrphanedData()
 

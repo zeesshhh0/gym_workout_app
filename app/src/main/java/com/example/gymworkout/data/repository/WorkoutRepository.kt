@@ -17,7 +17,7 @@ class WorkoutRepository(context: Context) {
     private val firestoreSyncManager = FirestoreSyncManager()
 
     private val currentUserId: String
-        get() = auth.currentUser?.uid ?: ""
+        get() = auth.currentUser?.uid ?: "local_user"
 
     fun setSyncListeners(onFailure: (String) -> Unit, onUnauthenticated: () -> Unit) {
         firestoreSyncManager.onSyncFailure = onFailure
@@ -27,16 +27,16 @@ class WorkoutRepository(context: Context) {
     // User methods
     fun getUserName(): String? = dbHelper.getUserName(currentUserId)
     fun getUserDetails(): Pair<String, String>? = dbHelper.getUserDetails(currentUserId)
-    fun updateUserDetails(username: String, email: String) = 
-        dbHelper.updateUserDetails(currentUserId, username, email)
-    fun addUser(username: String, email: String) = 
+    fun addUser(username: String, email: String) {
         dbHelper.addUser(currentUserId, username, email, "")
+        firestoreSyncManager.syncUserProfile(username, email)
+    }
 
     // Workout methods
-    fun addWorkout(name: String, description: String): Long {
-        val id = dbHelper.addWorkout(currentUserId, name, description)
+    fun addWorkout(name: String): Long {
+        val id = dbHelper.addWorkout(currentUserId, name)
         if (id != -1L) {
-            val workout = Workout(id.toInt(), name, description, "")
+            val workout = Workout(id.toInt(), name)
             firestoreSyncManager.syncWorkout(workout)
         }
         return id
@@ -45,7 +45,7 @@ class WorkoutRepository(context: Context) {
         dbHelper.getLatestWorkoutForUser(currentUserId)
     fun updateWorkoutName(workoutId: Long, newName: String) {
         dbHelper.updateWorkoutName(currentUserId, workoutId, newName)
-        val workout = Workout(workoutId.toInt(), newName, "", "")
+        val workout = Workout(workoutId.toInt(), newName)
         firestoreSyncManager.syncWorkout(workout)
     }
     fun getWorkoutName(workoutId: Long): String = 

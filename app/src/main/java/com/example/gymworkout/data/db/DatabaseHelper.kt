@@ -9,7 +9,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     companion object {
         private const val DATABASE_NAME = "gymworkout1.db"
-        private const val DATABASE_VERSION = 6
+        private const val DATABASE_VERSION = 8
     }
 
 
@@ -28,8 +28,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL("""
             CREATE TABLE MUSCLE_GROUPS (
                 muscle_group_id INTEGER PRIMARY KEY,
-                name TEXT NOT NULL UNIQUE,
-                body_region TEXT NOT NULL
+                name TEXT NOT NULL UNIQUE
             )
         """.trimIndent())
 
@@ -50,7 +49,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 workout_id INTEGER PRIMARY KEY,
                 user_id TEXT NOT NULL,
                 workout_name TEXT NOT NULL,
-                description TEXT,
                 FOREIGN KEY (user_id) REFERENCES USERS(user_id)
             )
         """.trimIndent())
@@ -62,7 +60,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 workout_date DATE NOT NULL,
                 start_time TIME,
                 end_time TIME,
-                notes TEXT,
                 user_id TEXT,
                 FOREIGN KEY (workout_id) REFERENCES WORKOUT(workout_id)
             )
@@ -88,16 +85,17 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             INSERT INTO USERS (user_id, username, email, password_hash, created_at)
             VALUES
             ('uid_john', 'FitJohn2024', 'john@example.com', 'hash_john_123', '2025-09-01 10:00:00'),
-            ('uid_sara', 'StrongSara', 'sara@example.com', 'hash_sara_123', '2025-09-05 14:30:00')
+            ('uid_sara', 'StrongSara', 'sara@example.com', 'hash_sara_123', '2025-09-05 14:30:00'),
+            ('local_user', 'Local Account', 'local', '', '2025-01-01 00:00:00')
         """.trimIndent())
 
         db.execSQL("""
-            INSERT INTO MUSCLE_GROUPS (muscle_group_id, name, body_region)
+            INSERT INTO MUSCLE_GROUPS (muscle_group_id, name)
             VALUES
-            (1, 'Chest', 'Upper Body'),
-            (2, 'Biceps', 'Upper Body'),
-            (3, 'Quadriceps', 'Lower Body'),
-            (4, 'Abs', 'Core')
+            (1, 'Chest'),
+            (2, 'Biceps'),
+            (3, 'Quadriceps'),
+            (4, 'Abs')
         """.trimIndent())
 
         db.execSQL("""
@@ -130,17 +128,17 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             """.trimIndent())
 
         db.execSQL("""
-            INSERT INTO WORKOUT (workout_id, user_id, workout_name, description)
+            INSERT INTO WORKOUT (workout_id, user_id, workout_name)
             VALUES
-            (1, 'uid_john', 'Morning Workout', 'A workout to start the day'),
-            (2, 'uid_sara', 'Evening Workout', 'A workout to end the day')
+            (1, 'uid_john', 'Morning Workout'),
+            (2, 'uid_sara', 'Evening Workout')
         """.trimIndent())
 
         db.execSQL("""
-            INSERT INTO WORKOUT_SESSIONS (session_id, workout_id, workout_date, start_time, end_time, notes)
+            INSERT INTO WORKOUT_SESSIONS (session_id, workout_id, workout_date, start_time, end_time)
             VALUES
-            (1, 1, '2025-09-20', '08:00:00', '09:00:00', 'Good energy, strong performance'),
-            (2, 2, '2025-09-21', '18:30:00', '19:15:00', 'Felt tired, shortened workout')
+            (1, 1, '2025-09-20', '08:00:00', '09:00:00'),
+            (2, 2, '2025-09-21', '18:30:00', '19:15:00')
         """.trimIndent())
 
         db.execSQL("""
@@ -164,6 +162,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             db.execSQL("DROP TABLE IF EXISTS WORKOUT_EXERCISE")
         }
         
+        if (oldVersion < 8) {
+            db.execSQL("DROP TABLE IF EXISTS WORKOUT_SESSIONS")
+            db.execSQL("DROP TABLE IF EXISTS WORKOUT")
+            db.execSQL("DROP TABLE IF EXISTS SETS")
+        }
+
         if (oldVersion >= 4) {
             // Recreate tables completely if not handled above
             db.execSQL("DROP TABLE IF EXISTS USERS")
@@ -205,9 +209,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         if (cursor.moveToFirst()) {
             val id = cursor.getInt(cursor.getColumnIndexOrThrow("workout_id"))
             val name = cursor.getString(cursor.getColumnIndexOrThrow("workout_name"))
-            val description = cursor.getString(cursor.getColumnIndexOrThrow("description"))
-            workout = com.example.gymworkout.data.model.Workout(id,
-                userId, name, description)
+            workout = com.example.gymworkout.data.model.Workout(id, name)
         }
         cursor.close()
         return workout
@@ -231,8 +233,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             val date = cursor.getString(cursor.getColumnIndexOrThrow("workout_date"))
             val startTime = cursor.getString(cursor.getColumnIndexOrThrow("start_time"))
             val endTime = cursor.getString(cursor.getColumnIndexOrThrow("end_time"))
-            val notes = cursor.getString(cursor.getColumnIndexOrThrow("notes"))
-            session = com.example.gymworkout.data.model.WorkoutSession(id, workoutId, workoutName, date, startTime, endTime, notes)
+            session = com.example.gymworkout.data.model.WorkoutSession(id, workoutId, workoutName, date, startTime, endTime)
         }
         cursor.close()
         return session
@@ -349,16 +350,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return userDetails
     }
 
-    fun updateUserDetails(userId: String, username: String, email: String) {
-        val db = this.writableDatabase
-        val contentValues = ContentValues()
-        contentValues.put("username", username)
-        contentValues.put("email", email)
-        db.update("USERS", contentValues, "user_id = ?", arrayOf(userId))
-    }
-
-
-
     fun getAllExercises(): List<com.example.gymworkout.data.model.Exercise> {
         val exercises = mutableListOf<com.example.gymworkout.data.model.Exercise>()
         val db = this.readableDatabase
@@ -415,12 +406,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return db.insert("EXERCISES", null, contentValues)
     }
 
-    fun addWorkout(userId: String, workoutName: String, description: String): Long {
+    fun addWorkout(userId: String, workoutName: String): Long {
         val db = this.writableDatabase
         val contentValues = ContentValues()
         contentValues.put("user_id", userId)
         contentValues.put("workout_name", workoutName)
-        contentValues.put("description", description)
         return db.insert("WORKOUT", null, contentValues)
     }
 
@@ -563,7 +553,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val sessions = mutableListOf<com.example.gymworkout.data.model.WorkoutSession>()
         val db = this.readableDatabase
         val cursor = db.rawQuery("""
-            SELECT ws.session_id, ws.workout_id, w.workout_name, ws.workout_date, ws.start_time, ws.end_time, ws.notes
+            SELECT ws.session_id, ws.workout_id, w.workout_name, ws.workout_date, ws.start_time, ws.end_time
             FROM WORKOUT_SESSIONS ws
             INNER JOIN WORKOUT w ON ws.workout_id = w.workout_id
             WHERE w.user_id = ?
@@ -578,8 +568,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 val date = cursor.getString(cursor.getColumnIndexOrThrow("workout_date"))
                 val startTime = cursor.getString(cursor.getColumnIndexOrThrow("start_time"))
                 val endTime = cursor.getString(cursor.getColumnIndexOrThrow("end_time"))
-                val notes = cursor.getString(cursor.getColumnIndexOrThrow("notes"))
-                sessions.add(com.example.gymworkout.data.model.WorkoutSession(id, workoutId, workoutName, date, startTime, endTime, notes))
+                sessions.add(com.example.gymworkout.data.model.WorkoutSession(id, workoutId, workoutName, date, startTime, endTime))
             } while (cursor.moveToNext())
         }
         cursor.close()
@@ -722,7 +711,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 workoutValues.put("workout_id", w.id)
                 workoutValues.put("user_id", userId)
                 workoutValues.put("workout_name", w.name)
-                workoutValues.put("description", w.description)
                 db.insertWithOnConflict("WORKOUT", null, workoutValues, SQLiteDatabase.CONFLICT_REPLACE)
 
                 wData.sessions.forEach { sData ->
@@ -733,7 +721,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                     sessionValues.put("workout_date", s.date)
                     sessionValues.put("start_time", s.startTime)
                     sessionValues.put("end_time", s.endTime)
-                    sessionValues.put("notes", s.notes)
                     sessionValues.put("user_id", userId)
                     db.insertWithOnConflict("WORKOUT_SESSIONS", null, sessionValues, SQLiteDatabase.CONFLICT_REPLACE)
 

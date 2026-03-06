@@ -1,6 +1,5 @@
 package com.example.gymworkout.ui.main
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -10,13 +9,11 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.example.gymworkout.R
 import com.example.gymworkout.data.repository.WorkoutRepository
 import com.example.gymworkout.data.sync.FirestoreSyncManager
 import com.example.gymworkout.ui.login.LoginActivity
-import com.example.gymworkout.ui.profile.EditProfileActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 
@@ -27,12 +24,6 @@ class ProfileFragment : Fragment() {
     private lateinit var emailTextView: TextView
     private lateinit var auth: FirebaseAuth
     private val firestoreSyncManager = FirestoreSyncManager()
-
-    private val editProfileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            loadUserData()
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,36 +41,36 @@ class ProfileFragment : Fragment() {
 
         usernameTextView = view.findViewById(R.id.textViewUsername)
         emailTextView = view.findViewById(R.id.textViewEmail)
-        val editProfileButton = view.findViewById<Button>(R.id.buttonEditProfile)
-        val changePasswordButton = view.findViewById<Button>(R.id.buttonChangePassword)
         val logoutButton = view.findViewById<Button>(R.id.buttonLogout)
         val restoreCloudButton = view.findViewById<Button>(R.id.buttonRestoreCloud)
 
-        loadUserData()
+        if (auth.currentUser == null) {
+            usernameTextView.text = "Not Logged In"
+            emailTextView.text = "Local Account"
+            restoreCloudButton.visibility = View.GONE
+            logoutButton.text = "Log In / Sign Up"
+            logoutButton.setOnClickListener {
+                val intent = Intent(activity, LoginActivity::class.java)
+                startActivity(intent)
+            }
+        } else {
+            loadUserData()
 
-        restoreCloudButton.setOnClickListener {
-            showRestoreConfirmationDialog()
-        }
+            restoreCloudButton.setOnClickListener {
+                showRestoreConfirmationDialog()
+            }
 
-        logoutButton.setOnClickListener {
-            auth.signOut()
-            
-            val sharedPreferences = requireActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-            sharedPreferences.edit().clear().apply()
+            logoutButton.setOnClickListener {
+                auth.signOut()
+                
+                val sharedPreferences = requireActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                sharedPreferences.edit().clear().apply()
 
-            val intent = Intent(activity, LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            activity?.finish()
-        }
-
-        editProfileButton.setOnClickListener {
-            val intent = Intent(activity, EditProfileActivity::class.java)
-            editProfileLauncher.launch(intent)
-        }
-
-        changePasswordButton.setOnClickListener {
-            Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show()
+                val intent = Intent(activity, LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                activity?.finish()
+            }
         }
     }
 

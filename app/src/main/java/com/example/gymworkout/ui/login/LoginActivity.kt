@@ -81,6 +81,11 @@ class LoginActivity : AppCompatActivity() {
             .setCancelable(false)
             .show()
 
+        // First, fetch and save the user profile locally
+        firestoreSyncManager.fetchUserProfile { username, email ->
+            repository.addUser(username, email)
+        }
+
         firestoreSyncManager.fetchAllUserData(
             onSuccess = { allData ->
                 progressDialog.dismiss()

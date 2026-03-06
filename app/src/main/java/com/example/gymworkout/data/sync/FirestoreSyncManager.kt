@@ -22,11 +22,23 @@ class FirestoreSyncManager {
     private fun getUidOrAbort(): String? {
         val currentUid = uid
         if (currentUid == null) {
-            Log.e("FirestoreSyncManager", "Operation aborted: UID is null. Redirecting to login.")
-            onUnauthenticated?.invoke()
+            // Silently abort if user is not authenticated, allowing local-only use.
             return null
         }
         return currentUid
+    }
+
+    fun syncUserProfile(username: String, email: String) {
+        val uid = getUidOrAbort() ?: return
+        val userData = hashMapOf(
+            "username" to username,
+            "email" to email
+        )
+        firestore.collection("users").document(uid).set(userData, SetOptions.merge())
+            .addOnFailureListener { e ->
+                Log.e("FirestoreSyncManager", "Sync failed for user profile", e)
+                onSyncFailure?.invoke("Failed to backup user profile.")
+            }
     }
 
     private val userDoc: DocumentReference?
@@ -54,9 +66,24 @@ class FirestoreSyncManager {
             ?.collection("sessions")?.document(sessionId)
             ?.collection("exercises")?.document(exercise.id.toString())
         doc?.set(exercise.toFirestoreMap(sets), SetOptions.merge())?.addOnFailureListener { e ->
-            Log.e("FirestoreSyncManager", "Sync failed for exercise sets: ${doc?.path}", e)
+            Log.e("FirestoreSyncManager", "Sync failed for exercise sets: ${doc.path}", e)
             onSyncFailure?.invoke("Sync failed. Your data is saved locally.")
         }
+    }
+
+    fun fetchUserProfile(onSuccess: (String, String) -> Unit) {
+        val uid = getUidOrAbort() ?: return
+        firestore.collection("users").document(uid).get()
+            .addOnSuccessListener { doc ->
+                if (doc.exists()) {
+                    val username = doc.getString("username") ?: ""
+                    val email = doc.getString("email") ?: ""
+                    onSuccess(username, email)
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("FirestoreSyncManager", "Failed to fetch user profile", e)
+            }
     }
 
     fun fetchAllUserData(onSuccess: (List<WorkoutData>) -> Unit, onFailure: (Exception) -> Unit) {
@@ -78,9 +105,7 @@ class FirestoreSyncManager {
                     val workoutId = workoutDoc.id
                     val workout = Workout(
                         id = workoutDoc.getLong("id")?.toInt() ?: workoutId.toInt(),
-                        name = workoutDoc.getString("name") ?: "",
-                        description = workoutDoc.getString("description") ?: "",
-                        description1 = workoutDoc.getString("description1") ?: ""
+                        name = workoutDoc.getString("name") ?: ""
                     )
 
                     val sessions = mutableListOf<SessionData>()
@@ -101,8 +126,7 @@ class FirestoreSyncManager {
                                     workoutName = sessionDoc.getString("workoutName") ?: "",
                                     date = sessionDoc.getString("date") ?: "",
                                     startTime = sessionDoc.getString("startTime"),
-                                    endTime = sessionDoc.getString("endTime"),
-                                    notes = sessionDoc.getString("notes")
+                                    endTime = sessionDoc.getString("endTime")
                                 )
 
                                 val exercises = mutableListOf<ExerciseData>()

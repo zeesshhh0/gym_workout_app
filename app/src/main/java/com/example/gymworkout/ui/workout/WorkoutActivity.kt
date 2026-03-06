@@ -48,7 +48,7 @@ class WorkoutActivity : AppCompatActivity() {
 
         workoutId = intent.getLongExtra("workoutId", -1)
         if (workoutId == -1L) {
-            workoutId = repository.addWorkout("New Workout", "")
+            workoutId = repository.addWorkout("New Workout")
             sessionId = repository.getOrCreateWorkoutSession(workoutId.toInt())
         } else {
             sessionId = repository.getOrCreateWorkoutSession(workoutId.toInt())
