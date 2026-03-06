@@ -9,7 +9,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     companion object {
         private const val DATABASE_NAME = "gymworkout1.db"
-        private const val DATABASE_VERSION = 5
+        private const val DATABASE_VERSION = 6
     }
 
 
@@ -52,17 +52,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 workout_name TEXT NOT NULL,
                 description TEXT,
                 FOREIGN KEY (user_id) REFERENCES USERS(user_id)
-            )
-        """.trimIndent())
-
-        db.execSQL("""
-            CREATE TABLE WORKOUT_EXERCISE (
-                workout_exercise_id INTEGER PRIMARY KEY,
-                workout_id INTEGER NOT NULL,
-                exercise_id INTEGER NOT NULL,
-                user_id TEXT,
-                FOREIGN KEY (workout_id) REFERENCES WORKOUT(workout_id),
-                FOREIGN KEY (exercise_id) REFERENCES EXERCISES(exercise_id)
             )
         """.trimIndent())
 
@@ -148,15 +137,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         """.trimIndent())
 
         db.execSQL("""
-            INSERT INTO WORKOUT_EXERCISE (workout_exercise_id, workout_id, exercise_id)
-            VALUES
-            (1, 1, 1),
-            (2, 1, 2),
-            (3, 2, 3),
-            (4, 2, 4)
-        """.trimIndent())
-
-        db.execSQL("""
             INSERT INTO WORKOUT_SESSIONS (session_id, workout_id, workout_date, start_time, end_time, notes)
             VALUES
             (1, 1, '2025-09-20', '08:00:00', '09:00:00', 'Good energy, strong performance'),
@@ -176,16 +156,20 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         if (oldVersion < 4) {
-            db.execSQL("ALTER TABLE WORKOUT_EXERCISE ADD COLUMN user_id TEXT")
             db.execSQL("ALTER TABLE WORKOUT_SESSIONS ADD COLUMN user_id TEXT")
             db.execSQL("ALTER TABLE SETS ADD COLUMN user_id TEXT")
-        } else {
-            // Handle database schema upgrades here
+        }
+        
+        if (oldVersion < 6) {
+            db.execSQL("DROP TABLE IF EXISTS WORKOUT_EXERCISE")
+        }
+        
+        if (oldVersion >= 4) {
+            // Recreate tables completely if not handled above
             db.execSQL("DROP TABLE IF EXISTS USERS")
             db.execSQL("DROP TABLE IF EXISTS MUSCLE_GROUPS")
             db.execSQL("DROP TABLE IF EXISTS EXERCISES")
             db.execSQL("DROP TABLE IF EXISTS WORKOUT")
-            db.execSQL("DROP TABLE IF EXISTS WORKOUT_EXERCISE")
             db.execSQL("DROP TABLE IF EXISTS WORKOUT_SESSIONS")
             db.execSQL("DROP TABLE IF EXISTS SETS")
             onCreate(db)
@@ -442,22 +426,38 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     fun addExerciseToWorkout(userId: String, workoutId: Int, exerciseId: Int): Long {
         val db = this.writableDatabase
-        val contentValues = ContentValues()
-        contentValues.put("workout_id", workoutId)
-        contentValues.put("exercise_id", exerciseId)
-        contentValues.put("user_id", userId)
-        return db.insert("WORKOUT_EXERCISE", null, contentValues)
+        // Find the active session for this workout
+        var sessionId = -1
+        val sessionCursor = db.rawQuery("SELECT session_id FROM WORKOUT_SESSIONS WHERE workout_id = ? AND user_id = ? ORDER BY session_id DESC LIMIT 1", arrayOf(workoutId.toString(), userId))
+        if (sessionCursor.moveToFirst()) {
+            sessionId = sessionCursor.getInt(sessionCursor.getColumnIndexOrThrow("session_id"))
+        }
+        sessionCursor.close()
+        
+        if (sessionId != -1) {
+            val contentValues = ContentValues()
+            contentValues.put("session_id", sessionId)
+            contentValues.put("exercise_id", exerciseId)
+            contentValues.put("set_number", 1)
+            contentValues.put("reps", 0)
+            contentValues.put("weight_used", 0f)
+            contentValues.put("user_id", userId)
+            contentValues.put("is_completed", 0)
+            return db.insert("SETS", null, contentValues)
+        }
+        return -1L
     }
 
     fun getExercisesForWorkout(userId: String, workoutId: Int): List<com.example.gymworkout.data.model.Exercise> {
         val exercises = mutableListOf<com.example.gymworkout.data.model.Exercise>()
         val db = this.readableDatabase
         val cursor = db.rawQuery("""
-            SELECT e.exercise_id, e.exercise_name, mg.name as muscle_group, we.workout_id
+            SELECT DISTINCT e.exercise_id, e.exercise_name, mg.name as muscle_group, ws.workout_id
             FROM EXERCISES e
             INNER JOIN MUSCLE_GROUPS mg ON e.muscle_group_id = mg.muscle_group_id
-            INNER JOIN WORKOUT_EXERCISE we ON e.exercise_id = we.exercise_id
-            WHERE we.workout_id = ? AND we.user_id = ?
+            INNER JOIN SETS s ON e.exercise_id = s.exercise_id
+            INNER JOIN WORKOUT_SESSIONS ws ON s.session_id = ws.session_id
+            WHERE ws.workout_id = ? AND s.user_id = ?
         """, arrayOf(workoutId.toString(), userId))
         if (cursor.moveToFirst()) {
             do {
@@ -635,7 +635,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.beginTransaction()
         try {
             db.delete("WORKOUT_SESSIONS", "session_id = ? AND user_id = ?", arrayOf(sessionId.toString(), userId))
-            db.delete("WORKOUT_EXERCISE", "workout_id = ? AND user_id = ?", arrayOf(workoutId.toString(), userId))
             db.delete("WORKOUT", "workout_id = ? AND user_id = ?", arrayOf(workoutId.toString(), userId))
             db.setTransactionSuccessful()
         } finally {
@@ -670,7 +669,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     fun deleteExerciseFromWorkout(userId: String, workoutId: Int, exerciseId: Int) {
         val db = this.writableDatabase
-        db.delete("WORKOUT_EXERCISE", "workout_id = ? AND exercise_id = ? AND user_id = ?", arrayOf(workoutId.toString(), exerciseId.toString(), userId))
+        var sessionId = -1
+        val cursor = db.rawQuery("SELECT session_id FROM WORKOUT_SESSIONS WHERE workout_id = ? AND user_id = ? ORDER BY session_id DESC LIMIT 1", arrayOf(workoutId.toString(), userId))
+        if (cursor.moveToFirst()) {
+            sessionId = cursor.getInt(cursor.getColumnIndexOrThrow("session_id"))
+        }
+        cursor.close()
+        if (sessionId != -1) {
+            db.delete("SETS", "session_id = ? AND exercise_id = ? AND user_id = ?", arrayOf(sessionId.toString(), exerciseId.toString(), userId))
+        }
     }
 
     fun clearAllData(userId: String) {
@@ -679,7 +686,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         try {
             db.delete("SETS", "user_id = ?", arrayOf(userId))
             db.delete("WORKOUT_SESSIONS", "user_id = ?", arrayOf(userId))
-            db.delete("WORKOUT_EXERCISE", "user_id = ?", arrayOf(userId))
             db.delete("WORKOUT", "user_id = ?", arrayOf(userId))
             db.setTransactionSuccessful()
         } finally {
@@ -696,9 +702,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             
             // Delete incomplete sessions
             db.delete("WORKOUT_SESSIONS", "end_time IS NULL AND user_id = ?", arrayOf(userId))
-            
-            // Delete workout_exercises for workouts that have no sessions left
-            db.execSQL("DELETE FROM WORKOUT_EXERCISE WHERE workout_id NOT IN (SELECT DISTINCT workout_id FROM WORKOUT_SESSIONS WHERE user_id = ?) AND user_id = ?", arrayOf(userId, userId))
             
             // Delete workouts that have no sessions left
             db.execSQL("DELETE FROM WORKOUT WHERE workout_id NOT IN (SELECT DISTINCT workout_id FROM WORKOUT_SESSIONS WHERE user_id = ?) AND user_id = ?", arrayOf(userId, userId))
@@ -738,13 +741,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                         val e = eData.exercise
                         // Ensure exercise exists in EXERCISES (it's shared, but good to check or at least assume it's there)
                         // If it's a custom exercise, it should be in EXERCISES table.
-                        
-                        // Link exercise to workout in WORKOUT_EXERCISE
-                        val weValues = ContentValues()
-                        weValues.put("workout_id", w.id)
-                        weValues.put("exercise_id", e.id)
-                        weValues.put("user_id", userId)
-                        db.insertWithOnConflict("WORKOUT_EXERCISE", null, weValues, SQLiteDatabase.CONFLICT_REPLACE)
 
                         eData.sets.forEach { set ->
                             val setValues = ContentValues()

@@ -22,6 +22,9 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        binding = ActivityHomeBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         repository = WorkoutRepository(this)
         repository.setSyncListeners(
             onFailure = { message ->
@@ -51,21 +54,20 @@ class HomeActivity : AppCompatActivity() {
         // Clean up any incomplete sessions from previous app runs
         repository.cleanUpOrphanedData()
 
-        binding = ActivityHomeBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+
 
         val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
-        bottomNav.setOnNavigationItemSelectedListener(navListener)
+        bottomNav.setOnItemSelectedListener(navListener)
 
         // Load the default fragment
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction().replace(R.id.fragment_container,
                 HomeFragment()
             ).commit()
-            supportActionBar?.title = "Home"
+            supportActionBar?.title = "Workout Tracker"
         }
     }
 

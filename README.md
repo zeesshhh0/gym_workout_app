@@ -53,8 +53,11 @@ To get a local copy up and running, follow these simple steps.
 - [x] there is some glitch in the add new set function
 - [x] change the ui of workout exercises screen
 - [x] change the ui of workout session history (make it month wise category)
-- [ ] change the session detail page (should be similar to strong app)
+- [x] change the session detail page (should be similar to strong app)
 - [ ] add all the exercises from strong app
-- [ ] reconsider data structure of the app
-- [ ] add change password implementation 
+- [ ] remove change password btn
 - [ ] the user details are not being properly saved
+- [ ] reconsider data structure of the app
+- [ ] make the logo of app orange
+- [ ] make auth in app optional
+- [ ] add a weekly streak goal for user

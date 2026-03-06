@@ -12,6 +12,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorSurface"
         android:elevation="0dp"
+        app:titleCentered="true"
         app:titleTextAppearance="@style/TextAppearance.GymWorkout.Toolbar.Title"
         app:titleTextColor="?attr/colorOnSurface"
         app:navigationIconTint="?attr/colorOnSurface" />

@@ -12,7 +12,6 @@ import com.example.gymworkout.data.repository.WorkoutRepository
 import com.example.gymworkout.ui.workout.SessionDetailActivity
 import com.example.gymworkout.ui.workout.WorkoutActivity
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -63,7 +62,7 @@ class HomeFragment : Fragment() {
         val daysToGo = weeklyGoal - (streak % weeklyGoal)
         streakSubtext.text = if (daysToGo > 0) "$daysToGo days to go until your weekly goal." else "Goal reached! Keep it up!"
 
-        val startWorkoutButton = view.findViewById<ExtendedFloatingActionButton>(R.id.button_start_workout)
+        val startWorkoutButton = view.findViewById<MaterialButton>(R.id.button_start_workout)
         startWorkoutButton.setOnClickListener {
             val intent = Intent(activity, WorkoutActivity::class.java)
             activity?.startActivity(intent)
