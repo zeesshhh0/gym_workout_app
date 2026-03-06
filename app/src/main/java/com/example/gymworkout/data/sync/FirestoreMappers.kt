@@ -14,7 +14,7 @@ fun Workout.toFirestoreMap(): HashMap<String, Any> {
 
 fun WorkoutSession.toFirestoreMap(): HashMap<String, Any> {
     val map = HashMap<String, Any>()
-    map["id"] = id
+    map["sessionId"] = id
     map["workoutId"] = workoutId
     map["workoutName"] = workoutName
     map["date"] = date
@@ -28,6 +28,7 @@ fun Exercise.toFirestoreMap(sets: List<Set>): HashMap<String, Any> {
     map["id"] = id
     map["name"] = name
     map["muscleGroup"] = muscleGroup
+    map["sets"] = sets.map { it.toFirestoreMap() }
     return map
 }
 

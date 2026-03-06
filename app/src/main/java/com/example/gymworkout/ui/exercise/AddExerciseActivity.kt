@@ -30,7 +30,6 @@ class AddExerciseActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val exerciseNameEditText = findViewById<TextInputEditText>(R.id.exerciseNameEditText)
-        val exerciseDescriptionEditText = findViewById<TextInputEditText>(R.id.exerciseDescriptionEditText)
         val exerciseInstructionsEditText = findViewById<TextInputEditText>(R.id.exerciseInstructionsEditText)
         val muscleGroupAutoCompleteTextView = findViewById<AutoCompleteTextView>(R.id.muscleGroupAutoCompleteTextView)
         val saveExerciseButton = findViewById<MaterialButton>(R.id.saveExerciseButton)
@@ -48,11 +47,10 @@ class AddExerciseActivity : AppCompatActivity() {
 
         saveExerciseButton.setOnClickListener {
             val name = exerciseNameEditText.text.toString()
-            val description = exerciseDescriptionEditText.text.toString()
             val instructions = exerciseInstructionsEditText.text.toString()
 
-            if (name.isNotEmpty() && description.isNotEmpty() && instructions.isNotEmpty() && selectedMuscleGroupId != -1) {
-                val id = repository.addExercise(selectedMuscleGroupId, name, description, instructions)
+            if (name.isNotEmpty() && instructions.isNotEmpty() && selectedMuscleGroupId != -1) {
+                val id = repository.addExercise(selectedMuscleGroupId, name, instructions)
                 if (id != -1L) {
                     Toast.makeText(this, "Exercise added successfully", Toast.LENGTH_SHORT).show()
                     setResult(Activity.RESULT_OK)

@@ -71,8 +71,12 @@ class WorkoutRepository(context: Context) {
             firestoreSyncManager.syncSession(session, session.workoutId.toString())
             val exercises = dbHelper.getExercisesForSession(currentUserId, sessionId)
             exercises.forEach { exercise ->
-                val sets = dbHelper.getSetsForExerciseInSession(currentUserId, sessionId, exercise.id)
-                firestoreSyncManager.syncExerciseSets(exercise, sessionId.toString(), session.workoutId.toString(), sets)
+                // Since the Firestore structure now places exercises directly under the workout,
+                // we should ideally sync all sets for this exercise across the whole workout.
+                // However, our local query is currently session-scoped. We must get sets for the whole workout
+                // to avoid overwriting previous sessions' sets in Firestore.
+                val sets = dbHelper.getSetsForExerciseInWorkout(currentUserId, session.workoutId, exercise.id)
+                firestoreSyncManager.syncExerciseSets(exercise, session.workoutId.toString(), sets)
             }
         }
     }
@@ -92,8 +96,8 @@ class WorkoutRepository(context: Context) {
     fun getAllExercises(): List<Exercise> = dbHelper.getAllExercises()
     fun getExerciseInstructions(exerciseName: String): String? = dbHelper.getExerciseInstructions(exerciseName)
     fun getAllMuscleGroups(): List<MuscleGroup> = dbHelper.getAllMuscleGroups()
-    fun addExercise(muscleGroupId: Int, name: String, description: String, instructions: String): Long = 
-        dbHelper.addExercise(muscleGroupId, name, description, instructions)
+    fun addExercise(muscleGroupId: Int, name: String, instructions: String): Long =
+        dbHelper.addExercise(muscleGroupId, name, instructions)
     fun addExerciseToWorkout(workoutId: Int, exerciseId: Int): Long = 
         dbHelper.addExerciseToWorkout(currentUserId, workoutId, exerciseId)
     fun getExercisesForWorkout(workoutId: Int): List<Exercise> =

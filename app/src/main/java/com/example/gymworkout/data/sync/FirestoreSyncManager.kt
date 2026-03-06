@@ -54,16 +54,14 @@ class FirestoreSyncManager {
 
     fun syncSession(session: WorkoutSession, workoutId: String) {
         val doc = userDoc?.collection("workouts")?.document(workoutId)
-            ?.collection("sessions")?.document(session.id.toString())
         doc?.set(session.toFirestoreMap(), SetOptions.merge())?.addOnFailureListener { e ->
             Log.e("FirestoreSyncManager", "Sync failed for session: ${doc?.path}", e)
             onSyncFailure?.invoke("Sync failed. Your data is saved locally.")
         }
     }
 
-    fun syncExerciseSets(exercise: Exercise, sessionId: String, workoutId: String, sets: List<Set>) {
+    fun syncExerciseSets(exercise: Exercise, workoutId: String, sets: List<Set>) {
         val doc = userDoc?.collection("workouts")?.document(workoutId)
-            ?.collection("sessions")?.document(sessionId)
             ?.collection("exercises")?.document(exercise.id.toString())
         doc?.set(exercise.toFirestoreMap(sets), SetOptions.merge())?.addOnFailureListener { e ->
             Log.e("FirestoreSyncManager", "Sync failed for exercise sets: ${doc.path}", e)
@@ -108,59 +106,50 @@ class FirestoreSyncManager {
                         name = workoutDoc.getString("name") ?: ""
                     )
 
-                    val sessions = mutableListOf<SessionData>()
-                    workoutDoc.reference.collection("sessions").get()
-                        .addOnSuccessListener { sessionDocs ->
-                            var pendingSessions = sessionDocs.size()
-                            if (sessionDocs.isEmpty) {
-                                allData.add(WorkoutData(workout, sessions))
-                                pendingWorkouts--
-                                if (pendingWorkouts == 0) onSuccess(allData)
-                                return@addOnSuccessListener
-                            }
+                    val session = WorkoutSession(
+                        id = workoutDoc.getLong("sessionId")?.toInt() ?: workoutId.toInt(),
+                        workoutId = workoutDoc.getLong("workoutId")?.toInt() ?: workoutId.toInt(),
+                        workoutName = workoutDoc.getString("workoutName") ?: workout.name,
+                        date = workoutDoc.getString("date") ?: "",
+                        startTime = workoutDoc.getString("startTime"),
+                        endTime = workoutDoc.getString("endTime")
+                    )
 
-                            for (sessionDoc in sessionDocs) {
-                                val session = WorkoutSession(
-                                    id = sessionDoc.getLong("id")?.toInt() ?: sessionDoc.id.toInt(),
-                                    workoutId = sessionDoc.getLong("workoutId")?.toInt() ?: workoutId.toInt(),
-                                    workoutName = sessionDoc.getString("workoutName") ?: "",
-                                    date = sessionDoc.getString("date") ?: "",
-                                    startTime = sessionDoc.getString("startTime"),
-                                    endTime = sessionDoc.getString("endTime")
+                    val exercises = mutableListOf<ExerciseData>()
+                    workoutDoc.reference.collection("exercises").get()
+                        .addOnSuccessListener { exerciseDocs ->
+                            for (exerciseDoc in exerciseDocs) {
+                                val exercise = Exercise(
+                                    id = exerciseDoc.getLong("id")?.toInt() ?: exerciseDoc.id.toInt(),
+                                    name = exerciseDoc.getString("name") ?: "",
+                                    muscleGroup = exerciseDoc.getString("muscleGroup") ?: ""
                                 )
-
-                                val exercises = mutableListOf<ExerciseData>()
-                                sessionDoc.reference.collection("exercises").get()
-                                    .addOnSuccessListener { exerciseDocs ->
-                                        for (exerciseDoc in exerciseDocs) {
-                                            val exercise = Exercise(
-                                                id = exerciseDoc.getLong("id")?.toInt() ?: exerciseDoc.id.toInt(),
-                                                name = exerciseDoc.getString("name") ?: "",
-                                                muscleGroup = exerciseDoc.getString("muscleGroup") ?: ""
-                                            )
-                                            val setsList = exerciseDoc.get("sets") as? List<Map<String, Any>> ?: emptyList()
-                                            val sets = setsList.map {
-                                                Set(
-                                                    id = (it["id"] as? Long)?.toInt() ?: 0,
-                                                    sessionId = (it["sessionId"] as? Long)?.toInt() ?: session.id,
-                                                    exerciseId = (it["exerciseId"] as? Long)?.toInt() ?: exercise.id,
-                                                    setNumber = (it["setNumber"] as? Long)?.toInt() ?: 0,
-                                                    weightUsed = (it["weightUsed"] as? Double)?.toFloat() ?: 0f,
-                                                    reps = (it["reps"] as? Long)?.toInt() ?: 0,
-                                                    isCompleted = (it["isCompleted"] as? Boolean) ?: false
-                                                )
-                                            }
-                                            exercises.add(ExerciseData(exercise, sets))
-                                        }
-                                        sessions.add(SessionData(session, exercises))
-                                        pendingSessions--
-                                        if (pendingSessions == 0) {
-                                            allData.add(WorkoutData(workout, sessions))
-                                            pendingWorkouts--
-                                            if (pendingWorkouts == 0) onSuccess(allData)
-                                        }
-                                    }
+                                val setsList = exerciseDoc.get("sets") as? List<Map<String, Any>> ?: emptyList()
+                                val sets = setsList.map {
+                                    Set(
+                                        id = (it["id"] as? Long)?.toInt() ?: 0,
+                                        sessionId = (it["sessionId"] as? Long)?.toInt() ?: session.id,
+                                        exerciseId = (it["exerciseId"] as? Long)?.toInt() ?: exercise.id,
+                                        setNumber = (it["setNumber"] as? Long)?.toInt() ?: 0,
+                                        weightUsed = (it["weightUsed"] as? Double)?.toFloat() ?: 0f,
+                                        reps = (it["reps"] as? Long)?.toInt() ?: 0,
+                                        isCompleted = (it["isCompleted"] as? Boolean) ?: false
+                                    )
+                                }
+                                exercises.add(ExerciseData(exercise, sets))
                             }
+                            
+                            val sessionData = SessionData(session, exercises)
+                            allData.add(WorkoutData(workout, listOf(sessionData)))
+                            
+                            pendingWorkouts--
+                            if (pendingWorkouts == 0) {
+                                onSuccess(allData)
+                            }
+                        }
+                        .addOnFailureListener {
+                            pendingWorkouts--
+                            if (pendingWorkouts == 0) onSuccess(allData)
                         }
                 }
             }
@@ -174,8 +163,7 @@ class FirestoreSyncManager {
     data class ExerciseData(val exercise: Exercise, val sets: List<Set>)
 
     fun deleteSession(workoutId: String, sessionId: String) {
-        val sessionDoc = userDoc?.collection("workouts")?.document(workoutId)
-            ?.collection("sessions")?.document(sessionId) ?: return
+        val sessionDoc = userDoc?.collection("workouts")?.document(workoutId) ?: return
         
         sessionDoc.collection("exercises").get().addOnSuccessListener { exercises ->
             val batch = firestore.batch()
@@ -195,7 +183,6 @@ class FirestoreSyncManager {
 
     fun deleteExercise(workoutId: String, sessionId: String, exerciseId: String) {
         val doc = userDoc?.collection("workouts")?.document(workoutId)
-            ?.collection("sessions")?.document(sessionId)
             ?.collection("exercises")?.document(exerciseId) ?: return
 
         doc.delete().addOnFailureListener { e ->

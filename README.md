@@ -54,10 +54,15 @@ To get a local copy up and running, follow these simple steps.
 - [x] change the ui of workout exercises screen
 - [x] change the ui of workout session history (make it month wise category)
 - [x] change the session detail page (should be similar to strong app)
-- [ ] add all the exercises from strong app
-- [ ] remove change password btn
-- [ ] the user details are not being properly saved
-- [ ] reconsider data structure of the app
-- [ ] make the logo of app orange
-- [ ] make auth in app optional
+- [x] remove change password btn
+- [x] the user details are not being properly saved
+- [x] reconsider data structure of the app
+- [x] make the logo of app orange
+- [x] make auth in app optional
+- [x] add all the exercises from strong app
+- [ ] add filter logic in with search to quickly filter exercises
+- [ ] when user logs in and its new account then the local data should be synced with cloud if its not new then we will ask user that we will replace this data with cloud or replace cloud data with local
+- [ ] sync data is not working
 - [ ] add a weekly streak goal for user
+- [ ] when i click on complete set the glitch happens and another set is added (make a rule that all the sets should be completed in order to finish the exercise)
+
