@@ -5,16 +5,23 @@ import android.os.Bundle
 import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.gymworkout.data.repository.WorkoutRepository
+import com.example.gymworkout.data.sync.FirestoreSyncManager
 import com.example.gymworkout.databinding.ActivitySignupBinding
 import com.example.gymworkout.ui.main.HomeActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SignupActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySignupBinding
     private lateinit var repository: WorkoutRepository
     private lateinit var auth: FirebaseAuth
+    private val firestoreSyncManager = FirestoreSyncManager()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,12 +65,8 @@ class SignupActivity : AppCompatActivity() {
                             repository.addUser(username, email)
 
                             Toast.makeText(this@SignupActivity, "Signup successful!", Toast.LENGTH_SHORT).show()
-
-                            // Navigate to HomeActivity
-                            val intent = Intent(this@SignupActivity, HomeActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            startActivity(intent)
-                            finish()
+                            
+                            handleSignupSync()
                         } else {
                             // If sign in fails, display a message to the user.
                             val errorMessage = task.exception?.message ?: "Signup failed."
@@ -79,5 +82,47 @@ class SignupActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+    }
+
+    private fun handleSignupSync() {
+        if (repository.hasLocalData()) {
+            showImportLocalDataPrompt()
+        } else {
+            navigateToHome()
+        }
+    }
+
+    private fun showImportLocalDataPrompt() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Import Local Data")
+            .setMessage("You have local workout data. Would you like to import it into your new cloud account?")
+            .setPositiveButton("Import to Cloud") { _, _ ->
+                val progressDialog = MaterialAlertDialogBuilder(this)
+                    .setTitle("Syncing Data")
+                    .setMessage("Syncing your workouts...")
+                    .setCancelable(false)
+                    .show()
+
+                lifecycleScope.launch(Dispatchers.IO) {
+                    repository.pushLocalToCloud()
+                    withContext(Dispatchers.Main) {
+                        progressDialog.dismiss()
+                        Toast.makeText(this@SignupActivity, "Local data pushed to cloud", Toast.LENGTH_SHORT).show()
+                        navigateToHome()
+                    }
+                }
+            }
+            .setNegativeButton("Keep Local Only") { _, _ ->
+                navigateToHome()
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun navigateToHome() {
+        val intent = Intent(this, HomeActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 }

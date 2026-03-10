@@ -60,9 +60,9 @@ To get a local copy up and running, follow these simple steps.
 - [x] make the logo of app orange
 - [x] make auth in app optional
 - [x] add all the exercises from strong app
-- [ ] add filter logic in with search to quickly filter exercises
-- [ ] when user logs in and its new account then the local data should be synced with cloud if its not new then we will ask user that we will replace this data with cloud or replace cloud data with local
-- [ ] sync data is not working
+- [x] add filter logic in with search to quickly filter exercises
+- [x] when user logs in and its new account then the local data should be synced with cloud if account not new then we will ask user that we will replace this data with cloud or replace cloud data with local
+- [x] sync data is not working
+- [x] when i click on complete set the glitch happens and another set is added (make a rule that all the sets should be completed in order to finish the exercise)
 - [ ] add a weekly streak goal for user
-- [ ] when i click on complete set the glitch happens and another set is added (make a rule that all the sets should be completed in order to finish the exercise)
-
+- [ ] make every top bar scrollable

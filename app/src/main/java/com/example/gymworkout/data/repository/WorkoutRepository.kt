@@ -160,7 +160,59 @@ class WorkoutRepository(context: Context) {
 
     fun hasLocalData(): Boolean {
         return dbHelper.getAllWorkoutSessions(currentUserId).isNotEmpty() || 
-               dbHelper.getLatestWorkoutForUser(currentUserId) != null
+               dbHelper.getLatestWorkoutForUser(currentUserId) != null ||
+               dbHelper.getAllWorkoutSessions("local_user").isNotEmpty() ||
+               dbHelper.getLatestWorkoutForUser("local_user") != null
+    }
+
+    fun pushLocalToCloud() {
+        // First migrate local_user data to currentUserId if we are logged in
+        if (currentUserId != "local_user") {
+            migrateLocalToCurrentUser()
+        }
+
+        val db = dbHelper.readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM WORKOUT WHERE user_id = ?", arrayOf(currentUserId))
+        val workouts = mutableListOf<Workout>()
+        if (cursor.moveToFirst()) {
+            do {
+                val id = cursor.getInt(cursor.getColumnIndexOrThrow("workout_id"))
+                val name = cursor.getString(cursor.getColumnIndexOrThrow("workout_name"))
+                workouts.add(Workout(id, name))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        
+        workouts.forEach { w ->
+            firestoreSyncManager.syncWorkout(w)
+        }
+        
+        val sessions = dbHelper.getAllWorkoutSessions(currentUserId)
+        sessions.forEach { session ->
+            firestoreSyncManager.syncSession(session, session.workoutId.toString())
+            val exercises = dbHelper.getExercisesForSession(currentUserId, session.id)
+            exercises.forEach { exercise ->
+                val sets = dbHelper.getSetsForExerciseInWorkout(currentUserId, session.workoutId, exercise.id)
+                firestoreSyncManager.syncExerciseSets(exercise, session.workoutId.toString(), sets)
+            }
+        }
+    }
+
+    private fun migrateLocalToCurrentUser() {
+        val db = dbHelper.writableDatabase
+        db.beginTransaction()
+        try {
+            val cv = android.content.ContentValues()
+            cv.put("user_id", currentUserId)
+            
+            db.update("WORKOUT", cv, "user_id = ?", arrayOf("local_user"))
+            db.update("WORKOUT_SESSIONS", cv, "user_id = ?", arrayOf("local_user"))
+            db.update("SETS", cv, "user_id = ?", arrayOf("local_user"))
+            
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
     }
 
     fun restoreUserData(data: List<FirestoreSyncManager.WorkoutData>) {

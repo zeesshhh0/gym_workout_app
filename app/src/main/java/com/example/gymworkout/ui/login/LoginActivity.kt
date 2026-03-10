@@ -5,12 +5,16 @@ import android.os.Bundle
 import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.gymworkout.data.repository.WorkoutRepository
 import com.example.gymworkout.data.sync.FirestoreSyncManager
 import com.example.gymworkout.databinding.ActivityLoginBinding
 import com.example.gymworkout.ui.main.HomeActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class LoginActivity : AppCompatActivity() {
 
@@ -77,7 +81,7 @@ class LoginActivity : AppCompatActivity() {
     private fun handleLoginRestore() {
         val progressDialog = MaterialAlertDialogBuilder(this)
             .setTitle("Syncing Data")
-            .setMessage("Checking for cloud data...")
+            .setMessage("Syncing your workouts...")
             .setCancelable(false)
             .show()
 
@@ -88,41 +92,91 @@ class LoginActivity : AppCompatActivity() {
 
         firestoreSyncManager.fetchAllUserData(
             onSuccess = { allData ->
-                progressDialog.dismiss()
-                if (allData.isNotEmpty()) {
-                    if (!repository.hasLocalData()) {
-                        // Auto-restore
-                        repository.restoreUserData(allData)
-                        Toast.makeText(this, "Data restored from cloud", Toast.LENGTH_SHORT).show()
-                        navigateToHome()
+                if (allData.isEmpty()) {
+                    // Condition A: Cloud is empty.
+                    if (repository.hasLocalData()) {
+                        progressDialog.dismiss()
+                        showImportLocalDataPrompt()
                     } else {
-                        // Prompt user
-                        showRestorePrompt(allData)
+                        progressDialog.dismiss()
+                        navigateToHome()
                     }
                 } else {
-                    navigateToHome()
+                    // Condition B: Cloud has data. Show Sync Conflict Dialog.
+                    progressDialog.dismiss()
+                    showSyncConflictDialog(allData)
                 }
             },
             onFailure = { e ->
                 progressDialog.dismiss()
-                // Just log and navigate, don't block login
                 android.util.Log.e("LoginActivity", "Sync check failed", e)
                 navigateToHome()
             }
         )
     }
 
-    private fun showRestorePrompt(allData: List<FirestoreSyncManager.WorkoutData>) {
+    private fun showImportLocalDataPrompt() {
         MaterialAlertDialogBuilder(this)
-            .setTitle("Cloud Data Found")
-            .setMessage("You have workout data in the cloud. Would you like to restore it and overwrite local data, or keep your current local data?")
-            .setPositiveButton("Restore from Cloud") { _, _ ->
-                repository.restoreUserData(allData)
-                Toast.makeText(this, "Data restored from cloud", Toast.LENGTH_SHORT).show()
+            .setTitle("Import Local Data")
+            .setMessage("You have local workout data. Would you like to import it into your cloud account?")
+            .setPositiveButton("Import to Cloud") { _, _ ->
+                val progressDialog = MaterialAlertDialogBuilder(this)
+                    .setTitle("Syncing Data")
+                    .setMessage("Syncing your workouts...")
+                    .setCancelable(false)
+                    .show()
+
+                lifecycleScope.launch(Dispatchers.IO) {
+                    repository.pushLocalToCloud()
+                    withContext(Dispatchers.Main) {
+                        progressDialog.dismiss()
+                        Toast.makeText(this@LoginActivity, "Local data pushed to cloud", Toast.LENGTH_SHORT).show()
+                        navigateToHome()
+                    }
+                }
+            }
+            .setNegativeButton("Keep Local Only") { _, _ ->
                 navigateToHome()
             }
-            .setNegativeButton("Keep Local Data") { _, _ ->
-                navigateToHome()
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun showSyncConflictDialog(allData: List<FirestoreSyncManager.WorkoutData>) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Existing Data Found")
+            .setMessage("Your account already has saved workouts. How would you like to sync your data?")
+            .setPositiveButton("Use Cloud Data") { _, _ ->
+                val progressDialog = MaterialAlertDialogBuilder(this)
+                    .setTitle("Syncing Data")
+                    .setMessage("Syncing your workouts...")
+                    .setCancelable(false)
+                    .show()
+
+                lifecycleScope.launch(Dispatchers.IO) {
+                    repository.restoreUserData(allData)
+                    withContext(Dispatchers.Main) {
+                        progressDialog.dismiss()
+                        Toast.makeText(this@LoginActivity, "Data restored from cloud", Toast.LENGTH_SHORT).show()
+                        navigateToHome()
+                    }
+                }
+            }
+            .setNegativeButton("Use Local Data") { _, _ ->
+                val progressDialog = MaterialAlertDialogBuilder(this)
+                    .setTitle("Syncing Data")
+                    .setMessage("Syncing your workouts...")
+                    .setCancelable(false)
+                    .show()
+
+                lifecycleScope.launch(Dispatchers.IO) {
+                    repository.pushLocalToCloud()
+                    withContext(Dispatchers.Main) {
+                        progressDialog.dismiss()
+                        Toast.makeText(this@LoginActivity, "Local data pushed to cloud", Toast.LENGTH_SHORT).show()
+                        navigateToHome()
+                    }
+                }
             }
             .setCancelable(false)
             .show()

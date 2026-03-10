@@ -51,6 +51,8 @@ class SetAdapter(
             holder.reps.setText(repsStr)
         }
         
+        // Remove listener before setting isChecked to avoid triggering it during binding
+        holder.completeCheckbox.setOnCheckedChangeListener(null)
         holder.completeCheckbox.isChecked = set.isCompleted
         
         updateSetRowStyle(holder, set.isCompleted)
@@ -76,7 +78,15 @@ class SetAdapter(
             if (pos != RecyclerView.NO_POSITION) {
                 val currentItem = sets[pos]
                 if (isChecked != currentItem.isCompleted) {
-                    onSetCompleteChange(currentItem, isChecked)
+                    // Update the model locally for immediate UI response
+                    val updatedSet = currentItem.copy(isCompleted = isChecked)
+                    sets[pos] = updatedSet
+                    
+                    // Notify that ONLY this item has changed to avoid full refresh/glitches
+                    notifyItemChanged(pos)
+                    
+                    // Call callback to sync with Database/Firestore
+                    onSetCompleteChange(updatedSet, isChecked)
                 }
             }
         }

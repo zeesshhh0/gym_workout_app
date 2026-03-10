@@ -53,8 +53,8 @@ class WorkoutAdapter(
                 }
             }, { set, isCompleted ->
                 repository.updateSetCompletionStatus(set.id, isCompleted)
-                val updatedSets = repository.getSetsForExercise(sessionId, exercise.id)
-                (holder.setsRecyclerView.adapter as SetAdapter).updateData(updatedSets)
+                // We no longer call updateData here because SetAdapter now handles its own 
+                // local update and notifyItemChanged for smoother performance.
             })
             holder.setsRecyclerView.adapter = setAdapter
             holder.setsRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context)

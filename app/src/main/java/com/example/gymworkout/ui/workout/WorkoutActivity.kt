@@ -129,12 +129,24 @@ class WorkoutActivity : AppCompatActivity() {
             return
         }
 
+        // Validation: All sets must be completed and have valid data
         for (exercise in exercises) {
             val sets = repository.getSetsForExercise(sessionId, exercise.id)
             if (sets.isEmpty()) {
                 showInvalidExerciseDialog(exercise.name)
                 return
             }
+
+            val allSetsCompleted = sets.all { it.isCompleted }
+            if (!allSetsCompleted) {
+                Snackbar.make(
+                    findViewById(android.R.id.content),
+                    "Please complete or delete all sets before finishing the workout.",
+                    Snackbar.LENGTH_LONG
+                ).show()
+                return
+            }
+
             for (set in sets) {
                 if (set.weightUsed == 0f && set.reps == 0) {
                     showInvalidExerciseDialog(exercise.name)

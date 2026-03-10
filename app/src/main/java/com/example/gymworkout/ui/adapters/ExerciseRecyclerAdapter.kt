@@ -4,16 +4,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymworkout.R
 import com.example.gymworkout.data.model.Exercise
 
 class ExerciseRecyclerAdapter(
-    private var exercises: List<Exercise>,
     private val onItemClick: (Exercise) -> Unit,
     private val showAddSetButton: Boolean = false,
     private val showExerciseImage: Boolean = true
-) : RecyclerView.Adapter<ExerciseRecyclerAdapter.ExerciseViewHolder>() {
+) : ListAdapter<Exercise, ExerciseRecyclerAdapter.ExerciseViewHolder>(ExerciseDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExerciseViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -22,7 +23,7 @@ class ExerciseRecyclerAdapter(
     }
 
     override fun onBindViewHolder(holder: ExerciseViewHolder, position: Int) {
-        val exercise = exercises[position]
+        val exercise = getItem(position)
         holder.bind(exercise)
         if (showAddSetButton) {
             holder.addSetButton.visibility = View.VISIBLE
@@ -34,13 +35,6 @@ class ExerciseRecyclerAdapter(
         } else {
             holder.iconContainer.visibility = View.GONE
         }
-    }
-
-    override fun getItemCount(): Int = exercises.size
-
-    fun updateData(newExercises: List<Exercise>) {
-        exercises = newExercises
-        notifyDataSetChanged()
     }
 
     inner class ExerciseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -57,8 +51,7 @@ class ExerciseRecyclerAdapter(
             val drawableId = when (exercise.muscleGroup.lowercase()) {
                 "chest" -> R.drawable.chest
                 "biceps" -> R.drawable.biceps
-                "quadriceps" -> R.drawable.quadriceps
-                "abs" -> R.drawable.abs
+                "legs" -> R.drawable.quadriceps
                 else -> R.drawable.exercise
             }
             exerciseImageView.setImageResource(drawableId)
@@ -73,6 +66,16 @@ class ExerciseRecyclerAdapter(
             }
 
             itemView.setOnClickListener { onItemClick(exercise) }
+        }
+    }
+
+    class ExerciseDiffCallback : DiffUtil.ItemCallback<Exercise>() {
+        override fun areItemsTheSame(oldItem: Exercise, newItem: Exercise): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: Exercise, newItem: Exercise): Boolean {
+            return oldItem == newItem
         }
     }
 }
